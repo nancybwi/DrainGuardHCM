@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct WelcomeView: View {
-    
+    @Binding var showWelcomeView: Bool
     var body: some View {
         NavigationStack {
             ZStack{
@@ -28,12 +28,14 @@ struct WelcomeView: View {
                     Spacer()
                     
                 }
-            }.onTapGesture {NavigationLink(destination: LoginView()) {}}
+            }.onTapGesture {
+                showWelcomeView = false
+            }
         }
     }
 }
 
 
 #Preview {
-    WelcomeView()
+    WelcomeView(showWelcomeView: .constant(true))
 }

@@ -9,9 +9,14 @@ import SwiftUI
 
 @main
 struct DrainGuardHCMApp: App {
+    @State private var showWelcomeview: Bool = true
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            if !showWelcomeview{
+                NavBar()
+            }else{
+                WelcomeView(showWelcomeView: $showWelcomeview)
+            }
         }
     }
 }

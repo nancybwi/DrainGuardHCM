@@ -20,7 +20,7 @@ struct NavBar: View {
                         switch selection {
                         case 0: HomeView()
                         case 1: MapView()
-                            //                    case 2: AddView()
+                        case 2: CameraView()
                             //                    case 3: StatusView()
                             //                    case 4: ProfileView()
                         default: HomeView()
@@ -55,7 +55,7 @@ struct NavBar: View {
                         
                         VStack {
                             Button(action: { selection = 2 }) {
-                                Image("add")
+                                Image("addIcon")
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 80)
