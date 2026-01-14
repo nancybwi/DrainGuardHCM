@@ -4,7 +4,6 @@
 <dict>
 	<key>UIAppFonts</key>
 	<array>
-		<string>Fonts/BubblerOne-Regular.ttf</string>
 		<string>BubblerOne-Regular.ttf</string>
 	</array>
 </dict>
