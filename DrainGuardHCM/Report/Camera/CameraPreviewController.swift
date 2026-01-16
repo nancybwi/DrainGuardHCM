@@ -59,6 +59,5 @@ class CameraPreviewController: UIViewController {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        cameraModel?.session.stopRunning()
-    }
+        cameraModel?.session.stopRunning()    }
 }

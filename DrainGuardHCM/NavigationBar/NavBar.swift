@@ -19,7 +19,7 @@ struct NavBar: View {
                     Group {
                         switch selection {
                         case 0: HomeView()
-                        case 1: MapView()
+                        case 1: MapView(hazards: sampleHazards)
                         case 2: CameraView()
                             //                    case 3: StatusView()
                             //                    case 4: ProfileView()
