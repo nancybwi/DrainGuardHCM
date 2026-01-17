@@ -6,6 +6,14 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		3889C2632F1B77D700E7689B /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 3889C2622F1B77D700E7689B /* FirebaseAuth */; };
+		3889C2652F1B77D700E7689B /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3889C2642F1B77D700E7689B /* FirebaseCore */; };
+		3889C2672F1B77D700E7689B /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 3889C2662F1B77D700E7689B /* FirebaseDatabase */; };
+		3889C2692F1B77D700E7689B /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 3889C2682F1B77D700E7689B /* FirebaseFirestore */; };
+		3889C26B2F1B77D700E7689B /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 3889C26A2F1B77D700E7689B /* FirebaseStorage */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		795520A62F174D21008E5131 /* DrainGuardHCM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DrainGuardHCM.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -36,6 +44,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3889C2672F1B77D700E7689B /* FirebaseDatabase in Frameworks */,
+				3889C2692F1B77D700E7689B /* FirebaseFirestore in Frameworks */,
+				3889C2652F1B77D700E7689B /* FirebaseCore in Frameworks */,
+				3889C26B2F1B77D700E7689B /* FirebaseStorage in Frameworks */,
+				3889C2632F1B77D700E7689B /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +91,11 @@
 			);
 			name = DrainGuardHCM;
 			packageProductDependencies = (
+				3889C2622F1B77D700E7689B /* FirebaseAuth */,
+				3889C2642F1B77D700E7689B /* FirebaseCore */,
+				3889C2662F1B77D700E7689B /* FirebaseDatabase */,
+				3889C2682F1B77D700E7689B /* FirebaseFirestore */,
+				3889C26A2F1B77D700E7689B /* FirebaseStorage */,
 			);
 			productName = DrainGuardHCM;
 			productReference = 795520A62F174D21008E5131 /* DrainGuardHCM.app */;
@@ -107,6 +125,9 @@
 			);
 			mainGroup = 7955209D2F174D21008E5131;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				3889C2612F1B77D700E7689B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 795520A72F174D21008E5131 /* Products */;
 			projectDirPath = "";
@@ -339,6 +360,45 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3889C2612F1B77D700E7689B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.8.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3889C2622F1B77D700E7689B /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3889C2612F1B77D700E7689B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		3889C2642F1B77D700E7689B /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3889C2612F1B77D700E7689B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		3889C2662F1B77D700E7689B /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3889C2612F1B77D700E7689B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		3889C2682F1B77D700E7689B /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3889C2612F1B77D700E7689B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		3889C26A2F1B77D700E7689B /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3889C2612F1B77D700E7689B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 7955209E2F174D21008E5131 /* Project object */;
 }

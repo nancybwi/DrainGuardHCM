@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyCSk-KjwsJI0xK6O2ARSvbNGfUQ_13sksY</string>
+	<key>GCM_SENDER_ID</key>
+	<string>829045855597</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>Bath-Beyond.DrainGuardHCM</string>
+	<key>PROJECT_ID</key>
+	<string>drainguardhcm</string>
+	<key>STORAGE_BUCKET</key>
+	<string>drainguardhcm.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false/>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false/>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true/>
+	<key>IS_GCM_ENABLED</key>
+	<true/>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true/>
+	<key>CFBundleIdentifier</key>
+	<string></string>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:829045855597:ios:7459acfd4891c5fc18f664</string>
+</dict>
+</plist>
