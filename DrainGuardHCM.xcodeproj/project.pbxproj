@@ -6,6 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		798138C62F1CBC4300496861 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 798138C52F1CBC4300496861 /* FirebaseAuth */; };
+		798138C82F1CBC4300496861 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 798138C72F1CBC4300496861 /* FirebaseDatabase */; };
+		798138CA2F1CBC4300496861 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 798138C92F1CBC4300496861 /* FirebaseFirestore */; };
+		798138D52F1CBD3F00496861 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 798138D42F1CBD3F00496861 /* FirebaseCore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		795520A62F174D21008E5131 /* DrainGuardHCM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DrainGuardHCM.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -36,6 +43,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				798138C82F1CBC4300496861 /* FirebaseDatabase in Frameworks */,
+				798138C62F1CBC4300496861 /* FirebaseAuth in Frameworks */,
+				798138D52F1CBD3F00496861 /* FirebaseCore in Frameworks */,
+				798138CA2F1CBC4300496861 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +89,10 @@
 			);
 			name = DrainGuardHCM;
 			packageProductDependencies = (
+				798138C52F1CBC4300496861 /* FirebaseAuth */,
+				798138C72F1CBC4300496861 /* FirebaseDatabase */,
+				798138C92F1CBC4300496861 /* FirebaseFirestore */,
+				798138D42F1CBD3F00496861 /* FirebaseCore */,
 			);
 			productName = DrainGuardHCM;
 			productReference = 795520A62F174D21008E5131 /* DrainGuardHCM.app */;
@@ -107,6 +122,9 @@
 			);
 			mainGroup = 7955209D2F174D21008E5131;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				798138C42F1CBC4300496861 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 795520A72F174D21008E5131 /* Products */;
 			projectDirPath = "";
@@ -269,8 +287,6 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DrainGuardHCM/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app uses the camera to take photos";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Your location helps us display hazards near you.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to show your position on the map.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -301,8 +317,6 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DrainGuardHCM/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app uses the camera to take photos";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Your location helps us display hazards near you.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to show your position on the map.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -343,6 +357,40 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		798138C42F1CBC4300496861 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.8.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		798138C52F1CBC4300496861 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 798138C42F1CBC4300496861 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		798138C72F1CBC4300496861 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 798138C42F1CBC4300496861 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		798138C92F1CBC4300496861 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 798138C42F1CBC4300496861 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		798138D42F1CBD3F00496861 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 798138C42F1CBC4300496861 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 7955209E2F174D21008E5131 /* Project object */;
 }

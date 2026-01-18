@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct WelcomeView: View {
-    @Binding var showWelcomeView: Bool
+    @Binding var hasSeenWelcome: Bool
     var body: some View {
         NavigationStack {
             ZStack{
@@ -29,7 +29,7 @@ struct WelcomeView: View {
                     
                 }
             }.onTapGesture {
-                showWelcomeView = false
+                hasSeenWelcome = true
             }
         }
     }
@@ -37,5 +37,5 @@ struct WelcomeView: View {
 
 
 #Preview {
-    WelcomeView(showWelcomeView: .constant(true))
+    WelcomeView(hasSeenWelcome: .constant(false))
 }
