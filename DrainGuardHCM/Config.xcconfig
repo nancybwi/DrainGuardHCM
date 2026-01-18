@@ -1,0 +1,12 @@
+//
+//  Config.xcconfig
+//  DrainGuardHCM
+//
+//  Created by Anh Phung Thi Minh on 18/1/26.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://developer.apple.com/documentation/xcode/adding-a-build-configuration-file-to-your-project
+
+OPENROUTER_API_KEY=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
+OPENROUTER_MODEL=qwen/qwen-2.5-vl-7b-instruct:free
