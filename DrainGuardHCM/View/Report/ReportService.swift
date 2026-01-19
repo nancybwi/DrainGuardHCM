@@ -330,6 +330,7 @@ enum ReportError: LocalizedError {
     case firestoreSaveFailed(String)
     case fetchFailed(String)
     case updateFailed(String)
+    case validationFailed(String)
     
     var errorDescription: String? {
         switch self {
@@ -343,6 +344,8 @@ enum ReportError: LocalizedError {
             return "Failed to fetch reports: \(message)"
         case .updateFailed(let message):
             return "Failed to update report: \(message)"
+        case .validationFailed(let message):
+            return "Validation failed: \(message)"
         }
     }
 }

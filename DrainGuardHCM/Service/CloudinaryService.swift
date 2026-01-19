@@ -20,12 +20,39 @@ class CloudinaryService {
     func uploadImage(_ image: UIImage, reportId: String) async throws -> String {
         print("\n☁️ [CLOUDINARY] Starting upload...")
         
-        // Compress image
-        guard let imageData = image.jpegData(compressionQuality: 0.7) else {
+        // Compress image intelligently to stay under 10MB limit
+        let maxSizeBytes = 10 * 1024 * 1024 // 10MB
+        let targetSizeBytes = 8 * 1024 * 1024 // Target 8MB to leave headroom
+        
+        var compressionQuality: CGFloat = 0.85
+        var imageData = image.jpegData(compressionQuality: compressionQuality)
+        
+        // Iteratively reduce quality if needed
+        var attempts = 0
+        while let data = imageData, data.count > targetSizeBytes && compressionQuality > 0.3 {
+            compressionQuality -= 0.05
+            imageData = image.jpegData(compressionQuality: compressionQuality)
+            attempts += 1
+            
+            if let data = imageData {
+                print("☁️ [CLOUDINARY] Compression attempt \(attempts): \(data.count / 1024)KB at \(Int(compressionQuality * 100))%")
+            }
+        }
+        
+        guard let finalImageData = imageData else {
             throw NSError(domain: "CloudinaryError", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to compress image"])
         }
         
-        print("☁️ [CLOUDINARY] Image compressed: \(imageData.count / 1024)KB")
+        let sizeKB = finalImageData.count / 1024
+        let sizeMB = Double(finalImageData.count) / 1024.0 / 1024.0
+        
+        print("☁️ [CLOUDINARY] Image compressed: \(sizeKB)KB (\(String(format: "%.2f", sizeMB))MB) at \(Int(compressionQuality * 100))% quality")
+        
+        // Double check size
+        if finalImageData.count > maxSizeBytes {
+            throw NSError(domain: "CloudinaryError", code: -1, 
+                        userInfo: [NSLocalizedDescriptionKey: "Image too large even after compression (\(String(format: "%.2f", sizeMB))MB). Please take a smaller photo."])
+        }
         
         // Create upload URL
         let url = URL(string: "https://api.cloudinary.com/v1_1/\(cloudName)/image/upload")!
@@ -58,7 +85,7 @@ class CloudinaryService {
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
         body.append("Content-Disposition: form-data; name=\"file\"; filename=\"photo.jpg\"\r\n".data(using: .utf8)!)
         body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
-        body.append(imageData)
+        body.append(finalImageData)
         body.append("\r\n".data(using: .utf8)!)
         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
         
@@ -69,15 +96,38 @@ class CloudinaryService {
         // Upload
         let (data, response) = try await URLSession.shared.data(for: request)
         
-        guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
-            print("❌ [CLOUDINARY] Upload failed")
-            throw NSError(domain: "CloudinaryError", code: -1, userInfo: [NSLocalizedDescriptionKey: "Upload failed"])
+        guard let httpResponse = response as? HTTPURLResponse else {
+            print("❌ [CLOUDINARY] Invalid response")
+            throw NSError(domain: "CloudinaryError", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])
+        }
+        
+        print("☁️ [CLOUDINARY] Response status: \(httpResponse.statusCode)")
+        
+        // Log response body for debugging
+        if let responseString = String(data: data, encoding: .utf8) {
+            print("☁️ [CLOUDINARY] Response body: \(responseString)")
+        }
+        
+        guard httpResponse.statusCode == 200 else {
+            print("❌ [CLOUDINARY] Upload failed with status: \(httpResponse.statusCode)")
+            
+            // Try to parse error message
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let error = json["error"] as? [String: Any],
+               let message = error["message"] as? String {
+                print("❌ [CLOUDINARY] Error message: \(message)")
+                throw NSError(domain: "CloudinaryError", code: httpResponse.statusCode, 
+                            userInfo: [NSLocalizedDescriptionKey: "Cloudinary error: \(message)"])
+            }
+            
+            throw NSError(domain: "CloudinaryError", code: httpResponse.statusCode, 
+                        userInfo: [NSLocalizedDescriptionKey: "Upload failed with status \(httpResponse.statusCode)"])
         }
         
         // Parse response
         let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
         guard let secureUrl = json?["secure_url"] as? String else {
+            print("❌ [CLOUDINARY] No secure_url in response")
             throw NSError(domain: "CloudinaryError", code: -1, userInfo: [NSLocalizedDescriptionKey: "No URL in response"])
         }
         
