@@ -26,7 +26,7 @@ struct NavBar: View {
                     case 0:
                         HomeView()
                     case 1:
-                        MapView(hazards: sampleHazards)
+                        MapView()
                     case 2:
                         StatusView(reports: sampleReports)
                     case 3:

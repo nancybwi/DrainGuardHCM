@@ -23,7 +23,7 @@ struct Report: Codable, Identifiable {
     
     // MARK: - Report Content
     /// URL to the uploaded image in Firebase Storage
-    let imageURL: String
+    var imageURL: String
     
     /// User's description of the problem
     let description: String

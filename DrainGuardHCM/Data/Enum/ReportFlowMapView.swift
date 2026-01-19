@@ -12,6 +12,7 @@ import MapKit
 struct ReportFlowMapView: View {
     let capturedImage: UIImage
     
+    @StateObject private var drainService = DrainService()
     @StateObject private var locationManager = LocationManager()
     @State private var position: MapCameraPosition = .automatic
     @State private var selectedDrain: Drain?
@@ -26,7 +27,7 @@ struct ReportFlowMapView: View {
             // Map
             Map(position: $position) {
                 // Drain markers
-                ForEach(sampleHazards) { drain in
+                ForEach(drainService.drains) { drain in
                     Annotation("", coordinate: drain.coordinate) {
                         drainPin(drain: drain, isSelected: selectedDrain?.id == drain.id)
                             .onTapGesture {
@@ -114,6 +115,10 @@ struct ReportFlowMapView: View {
                 hasCenteredOnUser = true
                 centerOn(coord)
             }
+        }
+        .task {
+            // Fetch drains when view appears
+            await drainService.fetchDrains()
         }
         .onAppear {
             // Start location tracking when map appears

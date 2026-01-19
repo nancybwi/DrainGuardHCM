@@ -14,6 +14,7 @@ struct ReportSubmitView: View {
     let selectedDrain: Drain
     
     @StateObject private var locationManager = LocationManager()
+    @StateObject private var reportService = ReportServiceCloudinary()  // ← Changed to Cloudinary
     
     @State private var severity: Severity = .medium
     @State private var traffic: TrafficImpact = .slowing
@@ -22,6 +23,8 @@ struct ReportSubmitView: View {
     @State private var isSubmitting = false
     @State private var statusText: String = ""
     @State private var showSuccess = false
+    @State private var showError = false
+    @State private var errorMessage = ""
     
     @Environment(\.dismiss) private var dismiss
     
@@ -92,6 +95,19 @@ struct ReportSubmitView: View {
                     .buttonStyle(.borderedProminent)
                     .disabled(isSubmitting || !locationManager.hasLocation || description.isEmpty)
                     
+                    // Upload progress bar
+                    if isSubmitting && reportService.uploadProgress > 0 {
+                        VStack(spacing: 4) {
+                            ProgressView(value: reportService.uploadProgress)
+                                .tint(.blue)
+                            
+                            Text("Uploading: \(Int(reportService.uploadProgress * 100))%")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(.horizontal, 12)
+                    }
+                    
                     if !statusText.isEmpty {
                         Text(statusText)
                             .font(.system(size: 12))
@@ -109,6 +125,14 @@ struct ReportSubmitView: View {
             }
         } message: {
             Text("Your report has been submitted and will be validated by our AI system.")
+        }
+        .alert("Submission Failed", isPresented: $showError) {
+            Button("OK", role: .cancel) {}
+            Button("Retry") {
+                submit()
+            }
+        } message: {
+            Text(errorMessage)
         }
         .onAppear {
             // Get single location when form appears (no continuous tracking needed)
@@ -215,16 +239,40 @@ struct ReportSubmitView: View {
     // MARK: - Submit Logic
     
     private func submit() {
-        guard let userLocation = locationManager.userLocation,
-              let userId = Auth.auth().currentUser?.uid else {
-            statusText = "Error: Not authenticated or no location"
+        print("\n")
+        print("═══════════════════════════════════════════════════════════")
+        print("📝 [UI] SUBMIT BUTTON PRESSED")
+        print("═══════════════════════════════════════════════════════════")
+        
+        guard let userLocation = locationManager.userLocation else {
+            print("❌ [UI] ERROR: No user location available")
+            statusText = "Error: Location not available"
             return
         }
+        
+        print("📝 [UI] User location: \(userLocation.latitude), \(userLocation.longitude)")
+        
+        guard let userId = Auth.auth().currentUser?.uid else {
+            print("❌ [UI] ERROR: No authenticated user!")
+            if let currentUser = Auth.auth().currentUser {
+                print("   Current user exists but no UID: \(currentUser)")
+            } else {
+                print("   No current user at all")
+            }
+            statusText = "Error: Not authenticated"
+            return
+        }
+        
+        print("📝 [UI] User ID: \(userId)")
+        print("📝 [UI] Description: \(description)")
+        print("📝 [UI] Severity: \(severity.rawValue)")
+        print("📝 [UI] Traffic Impact: \(traffic.rawValue)")
+        print("📝 [UI] Selected Drain: \(selectedDrain.title)")
         
         isSubmitting = true
         statusText = "Creating report..."
         
-        // Create report object
+        // Create report object (without imageURL initially)
         let report = Report(
             id: nil, // Firestore will auto-generate
             userId: userId,
@@ -232,7 +280,7 @@ struct ReportSubmitView: View {
             drainTitle: selectedDrain.title,
             drainLatitude: selectedDrain.latitude,
             drainLongitude: selectedDrain.longitude,
-            imageURL: "", // Will be filled after upload
+            imageURL: "", // Will be filled by ReportService
             description: description,
             userSeverity: severity.rawValue,
             trafficImpact: traffic.rawValue,
@@ -254,17 +302,43 @@ struct ReportSubmitView: View {
             completedAt: nil
         )
         
-        // TODO: In next step, we'll add ReportService to:
-        // 1. Upload image to Firebase Storage
-        // 2. Save report to Firestore with imageURL
-        // 3. Trigger AI validation via Cloud Function
+        print("📝 [UI] Report object created")
+        print("📝 [UI] Starting async submission task...")
         
-        // For now, simulate submission
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            isSubmitting = false
-            statusText = "✅ Report created (pending upload implementation)"
-            showSuccess = true
-            print("📋 Report ready to submit:", report)
+        // Submit to Firebase
+        Task {
+            do {
+                statusText = "Uploading image..."
+                
+                print("📝 [UI] Calling reportService.submitReport()...")
+                let reportId = try await reportService.submitReport(image: image, report: report)
+                
+                // Success!
+                await MainActor.run {
+                    isSubmitting = false
+                    statusText = "✅ Report submitted successfully!"
+                    showSuccess = true
+                    print("✅ [UI] SUCCESS! Report submitted with ID: \(reportId)")
+                    print("═══════════════════════════════════════════════════════════\n")
+                }
+                
+            } catch {
+                // Error handling
+                await MainActor.run {
+                    isSubmitting = false
+                    statusText = "❌ Submission failed"
+                    errorMessage = error.localizedDescription
+                    showError = true
+                    print("❌ [UI] SUBMISSION ERROR: \(error.localizedDescription)")
+                    print("❌ [UI] Error type: \(type(of: error))")
+                    
+                    if let reportError = error as? ReportError {
+                        print("❌ [UI] ReportError details: \(reportError.errorDescription ?? "no description")")
+                    }
+                    
+                    print("═══════════════════════════════════════════════════════════\n")
+                }
+            }
         }
     }
 }

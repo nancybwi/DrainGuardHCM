@@ -81,8 +81,7 @@ import MapKit
 /// Map tab - For viewing drains, flood risks, navigation, etc.
 /// NOT for reporting (reporting starts from [+] button)
 struct MapView: View {
-    let hazards: [Drain]
-    
+    @StateObject private var drainService = DrainService()
     @StateObject private var locationManager = LocationManager()
     @State private var position: MapCameraPosition = .automatic
     @State private var selectedHazard: Drain?
@@ -91,7 +90,7 @@ struct MapView: View {
     var body: some View {
         ZStack {
             Map(position: $position) {
-                ForEach(hazards) { hazard in
+                ForEach(drainService.drains) { hazard in
                     Annotation("", coordinate: hazard.coordinate) {
                         hazardPin(isSelected: selectedHazard?.id == hazard.id)
                             .onTapGesture { selectedHazard = hazard }
@@ -129,6 +128,21 @@ struct MapView: View {
             .mapStyle(.standard)
             .ignoresSafeArea()
             
+            // Loading indicator
+            if drainService.isLoading {
+                VStack {
+                    ProgressView()
+                        .scaleEffect(1.5)
+                        .padding()
+                        .background(.ultraThinMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                    
+                    Text("Loading drains...")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            
             topRightControls()
             
             if let hazard = selectedHazard {
@@ -142,12 +156,14 @@ struct MapView: View {
                 centerOn(coord)
             }
         }
+        .task {
+            // Fetch drains when view appears
+            await drainService.fetchDrains()
+        }
         .onAppear {
-            // Start tracking when map appears
             locationManager.startTracking()
         }
         .onDisappear {
-            // Stop tracking when map disappears to save battery
             locationManager.stopTracking()
         }
     }
@@ -248,5 +264,5 @@ struct MapView: View {
 }
 
 #Preview {
-    MapView(hazards: sampleHazards)
+    MapView()
 }
