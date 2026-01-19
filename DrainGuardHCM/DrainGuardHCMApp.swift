@@ -25,10 +25,16 @@ struct DrainGuardHCMApp: App {
     @AppStorage("hasSeenWelcome") private var hasSeenWelcome: Bool = false
 
     var body: some Scene {
+        
         WindowGroup {
             if hasSeenWelcome {
                 RootView()
                     .environmentObject(session)
+                    .onAppear() {
+                        print("✅ App launched")
+                        session.listenAuth()
+                    }
+                
             } else {
                 WelcomeView(hasSeenWelcome: $hasSeenWelcome)
             }
