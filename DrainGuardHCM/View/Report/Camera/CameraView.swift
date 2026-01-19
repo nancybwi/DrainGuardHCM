@@ -10,6 +10,11 @@ import SwiftUI
 struct CameraView: View {
     @State private var capturedImage: UIImage? = nil
     @StateObject private var cameraModel = CameraModel()
+    @State private var goSubmit = false
+    
+    var selectedDrain: Drain? = nil
+    
+    
     
     var body: some View {
         ZStack {
@@ -30,15 +35,28 @@ struct CameraView: View {
                 .clipShape(Capsule())
                 .padding()
                 
-                if let image = capturedImage {
-                                    Image(uiImage: image)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 150, height: 150)
-                                }
+                //                if let image = capturedImage {
+                //                    Image(uiImage: image)
+                //                        .resizable()
+                //                        .scaledToFit()
+                //                        .frame(width: 150, height: 150)
+                //                }
+                
+                
+            }
             
-                                }
-       
+        }
+        .onReceive(cameraModel.$lastPhoto) { img in
+            guard let img else { return }
+            capturedImage = img
+            goSubmit = true
+        }
+        .navigationDestination(isPresented: $goSubmit) {
+            if let img = capturedImage {
+                ReportSubmitView(image: img, selectedDrain: selectedDrain)
+            } else {
+                Text("No image")
+            }
         }
     }
 }

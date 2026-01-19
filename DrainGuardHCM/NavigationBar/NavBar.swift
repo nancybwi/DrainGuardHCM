@@ -98,8 +98,7 @@
 //    }
 //}
 //
-//#Preview {
-//    NavBar()
+
 import SwiftUI
 
 struct NavBar: View {
@@ -136,7 +135,7 @@ struct NavBar: View {
                 ZStack {
                     RoundedRectangle(cornerRadius: 24, style: .continuous)
                         .fill(.white)
-                        .shadow(radius: 10)
+                        .shadow(radius: 5)
                         .frame(height: 92)
                         .padding(.horizontal, 18)
                     
@@ -161,7 +160,7 @@ struct NavBar: View {
                         Circle()
                             .fill(Color.brown)
                             .frame(width: 62, height: 62)
-                            .shadow(radius: 10)
+                            .shadow(radius: 5)
                         
                         Image(systemName: "plus")
                             .font(.system(size: 26, weight: .bold))
@@ -212,3 +211,6 @@ struct NavBar: View {
     }
 }
 
+#Preview {
+    NavBar()
+}
