@@ -103,7 +103,7 @@ class AIValidationService {
                 temperature: 0.4,
                 topK: 32,
                 topP: 1.0,
-                maxOutputTokens: 512, // Increased for gemini-2.5-flash to prevent MAX_TOKENS cutoff
+                maxOutputTokens: 2048, // High limit for gemini-2.5-flash thinking + response
                 responseMimeType: "application/json"
             )
         )

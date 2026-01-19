@@ -253,7 +253,13 @@ class ReportValidationCoordinator: ObservableObject {
             "timestamp": Timestamp(date: Date())
         ]
         
-        try await db.collection("image_hashes").addDocument(data: hashData)
-        print("✅ [FIREBASE] pHash saved")
+        do {
+            try await db.collection("image_hashes").addDocument(data: hashData)
+            print("✅ [FIREBASE] pHash saved")
+        } catch {
+            // Don't fail the entire submission if pHash saving fails
+            print("⚠️ [FIREBASE] Failed to save pHash (non-critical): \(error.localizedDescription)")
+            print("⚠️ [FIREBASE] Report will still be saved, but duplicate detection may not work")
+        }
     }
 }
