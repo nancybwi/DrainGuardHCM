@@ -4,4 +4,10 @@
    <FileRef
       location = "self:">
    </FileRef>
+   <FileRef
+      location = "group:CAMERA_CRASH_FIX_V2.md">
+   </FileRef>
+   <FileRef
+      location = "group:LOCATION_PERMISSION_DEBUG.md">
+   </FileRef>
 </Workspace>

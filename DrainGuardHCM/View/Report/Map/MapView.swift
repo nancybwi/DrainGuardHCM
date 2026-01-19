@@ -78,9 +78,10 @@
 import SwiftUI
 import MapKit
 
+/// Map tab - For viewing drains, flood risks, navigation, etc.
+/// NOT for reporting (reporting starts from [+] button)
 struct MapView: View {
-    let hazards: [Drain]
-    
+    @StateObject private var drainService = DrainService()
     @StateObject private var locationManager = LocationManager()
     @State private var position: MapCameraPosition = .automatic
     @State private var selectedHazard: Drain?
@@ -89,7 +90,7 @@ struct MapView: View {
     var body: some View {
         ZStack {
             Map(position: $position) {
-                ForEach(hazards) { hazard in
+                ForEach(drainService.drains) { hazard in
                     Annotation("", coordinate: hazard.coordinate) {
                         hazardPin(isSelected: selectedHazard?.id == hazard.id)
                             .onTapGesture { selectedHazard = hazard }
@@ -97,18 +98,56 @@ struct MapView: View {
                 }
                 
                 if let userCoord = locationManager.userLocation {
-                    Annotation("", coordinate: userCoord) {
-                        userPin()
+                    Annotation("You are here", coordinate: userCoord) {
+                        VStack(spacing: 4) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.blue.opacity(0.2))
+                                    .frame(width: 50, height: 50)
+                                
+                                Circle()
+                                    .fill(Color.blue)
+                                    .frame(width: 14, height: 14)
+                                
+                                Circle()
+                                    .stroke(Color.white, lineWidth: 3)
+                                    .frame(width: 14, height: 14)
+                            }
+                            
+                            Text("You are here")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(.ultraThinMaterial)
+                                .clipShape(Capsule())
+                        }
                     }
                 }
             }
             .mapStyle(.standard)
             .ignoresSafeArea()
             
+            // Loading indicator
+            if drainService.isLoading {
+                VStack {
+                    ProgressView()
+                        .scaleEffect(1.5)
+                        .padding()
+                        .background(.ultraThinMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                    
+                    Text("Loading drains...")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
             
             topRightControls()
             
-            bottomCard()
+            if let hazard = selectedHazard {
+                drainInfoCard(hazard)
+            }
         }
         .onReceive(locationManager.$userLocation) { coord in
             guard let coord else { return }
@@ -117,13 +156,22 @@ struct MapView: View {
                 centerOn(coord)
             }
         }
+        .task {
+            // Fetch drains when view appears
+            await drainService.fetchDrains()
+        }
+        .onAppear {
+            locationManager.startTracking()
+        }
+        .onDisappear {
+            locationManager.stopTracking()
+        }
     }
     
     private func centerOn(_ coord: CLLocationCoordinate2D) {
         position = .camera(MapCamera(centerCoordinate: coord, distance: 2600))
     }
     
-
     @ViewBuilder
     private func topRightControls() -> some View {
         VStack(spacing: 10) {
@@ -145,58 +193,54 @@ struct MapView: View {
     }
     
     @ViewBuilder
-    private func bottomCard() -> some View {
-        if let hazard = selectedHazard {
-            VStack(spacing: 12) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(hazard.title)
-                            .font(.system(size: 18, weight: .semibold))
-                            .lineLimit(1)
-                        
-                        Text("Ready to report this location")
+    private func drainInfoCard(_ hazard: Drain) -> some View {
+        VStack(spacing: 12) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(hazard.title)
+                        .font(.system(size: 18, weight: .semibold))
+                        .lineLimit(1)
+                    
+                    if let address = hazard.address {
+                        Text(address)
                             .font(.system(size: 13))
                             .foregroundStyle(.secondary)
                     }
-                    Spacer()
-                    Button {
-                        selectedHazard = nil
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 12, weight: .bold))
-                            .frame(width: 28, height: 28)
-                            .background(Color.black.opacity(0.06))
-                            .clipShape(Circle())
+                    
+                    if let district = hazard.district, let ward = hazard.ward {
+                        Text("\(ward), \(district)")
+                            .font(.system(size: 12))
+                            .foregroundStyle(.secondary)
                     }
                 }
-                
-                HStack(spacing: 12) {
-                    Button {
-                        centerOn(hazard.coordinate)
-                    } label: {
-                        Label("View", systemImage: "eye")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.bordered)
-                    
-                    Button {
-                        // TODO: mở flow report (CameraView / ReportView) ở đây
-                    } label: {
-                        Label("Report", systemImage: "plus.circle.fill")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
+                Spacer()
+                Button {
+                    selectedHazard = nil
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 12, weight: .bold))
+                        .frame(width: 28, height: 28)
+                        .background(Color.black.opacity(0.06))
+                        .clipShape(Circle())
                 }
             }
-            .padding(16)
-            .background(.ultraThinMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-            .padding(.horizontal, 16)
-            .padding(.bottom, 100)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-            .transition(.move(edge: .bottom).combined(with: .opacity))
-            .animation(.spring(response: 0.28, dampingFraction: 0.86), value: selectedHazard?.id)
+            
+            Button {
+                centerOn(hazard.coordinate)
+            } label: {
+                Label("View on Map", systemImage: "eye")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
         }
+        .padding(16)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .padding(.horizontal, 16)
+        .padding(.bottom, 100)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+        .transition(.move(edge: .bottom).combined(with: .opacity))
+        .animation(.spring(response: 0.28, dampingFraction: 0.86), value: selectedHazard?.id)
     }
     
     @ViewBuilder
@@ -217,15 +261,8 @@ struct MapView: View {
                 .opacity(isSelected ? 1 : 0.85)
         }
     }
-    
-    @ViewBuilder
-    private func userPin() -> some View {
-        ZStack {
-            Circle().fill(Color.blue.opacity(0.18)).frame(width: 44, height: 44)
-            Circle().fill(Color.blue).frame(width: 12, height: 12)
-        }
-    }
 }
+
 #Preview {
-    MapView(hazards: sampleHazards)
+    MapView()
 }
