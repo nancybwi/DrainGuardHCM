@@ -4,118 +4,23 @@
 //
 //  Created by Thao Trinh Phuong on 14/1/26.
 //
-//
-//import SwiftUI
-//
-//struct NavBar: View {
-//    @State private var selection = 0
-//
-//    var body: some View {
-//        NavigationStack {
-//            ZStack{
-//                Color("main").ignoresSafeArea()   // app background
-//                VStack(spacing: 0) {
-//                    // Main Content
-//                    Group {
-//                        switch selection {
-//                        case 0: HomeView()
-//                        case 1: MapView(hazards: sampleHazards)
-//                        case 2: CameraView()
-//                            //                    case 3: StatusView()
-//                            //                    case 4: ProfileView()
-//                        default: HomeView()
-//                        }
-//                    }
-//                    Spacer()
-//                    // Custom Tab Bar
-//                    HStack {
-//                        VStack {
-//                            Button(action: { selection = 0 }) {
-//                                Image("house")
-//                                    .resizable()
-//                                    .scaledToFit()
-//                                    .frame(height: 60)
-//                            }
-//                            Text("Home")
-//                                .font(.custom("BubblerOne-Regular", size: 20))
-//                                .frame(height: 24)
-//                        }.frame(maxWidth: .infinity)
-//
-//                        VStack {
-//                            Button(action: { selection = 1 }) {
-//                                Image("map")
-//                                    .resizable()
-//                                    .scaledToFit()
-//                                    .frame(height: 60)
-//                            }
-//                            Text("Map")
-//                                .font(.custom("BubblerOne-Regular", size: 20))
-//                                .frame(height: 24)
-//                        }.frame(maxWidth: .infinity)
-//
-//                        VStack {
-//                            Button(action: { selection = 2 }) {
-//                                Image("addIcon")
-//                                    .resizable()
-//                                    .scaledToFit()
-//                                    .frame(width: 80)
-//                            }
-//
-//                        }.frame(maxWidth: .infinity)
-//
-//                        VStack {
-//                            Button(action: { selection = 3 }) {
-//                                Image("status")
-//                                    .resizable()
-//                                    .scaledToFit()
-//                                    .frame(height: 60)
-//                            }
-//                            Text("Status")
-//                                .font(.custom("BubblerOne-Regular", size: 20))
-//                                .frame(height: 24)
-//                        }.frame(maxWidth: .infinity)
-//
-//                        VStack {
-//                            Button(action: { selection = 4 }) {
-//                                Image("profile")
-//                                    .resizable()
-//                                    .scaledToFit()
-//                                    .frame(height: 60)
-//                            }
-//                            Text("Profile")
-//                                .font(.custom("BubblerOne-Regular", size: 20))
-//                                .frame(height: 24)
-//                        }.frame(maxWidth: .infinity)
-//                    }
-//                    .padding(.horizontal, 20)
-//                    .frame(maxHeight: 124)
-//                    .background(Color.clear)
-//                }
-//                .ignoresSafeArea(edges: .bottom)
-//
-//            }
-//        }
-//    }
-//}
-//
 
 import SwiftUI
+import FirebaseAuth
 
 struct NavBar: View {
-    @State private var selection = 0
-    @State private var showReport = false
+    @State private var selection = 0 // Start on Home tab
+    @State private var showReportFlow = false // Start report flow
     
-    private let sampleReports: [Report] = [
-        Report(id: 1024, title: "Đường Nguyễn Huệ, Quận 1", submittedAt: Date(), status: .pending),
-        Report(id: 1025, title: "Kênh Nhiêu Lộc, Phường 15", submittedAt: Date(), status: .inProgress),
-        Report(id: 1026, title: "Đường Lê Lợi, Quận 1", submittedAt: Date(), status: .done)
-    ]
+    // Sample reports for StatusView (will be replaced with real data from Firestore)
+    @State private var sampleReports: [Report] = []
     
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottom) {
                 Color("main").ignoresSafeArea()
                 
+                // Main Content Area
                 Group {
                     switch selection {
                     case 0:
@@ -132,50 +37,71 @@ struct NavBar: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
-                ZStack {
-                    RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .fill(.white)
-                        .shadow(radius: 5)
-                        .frame(height: 92)
-                        .padding(.horizontal, 18)
-                    
-                    HStack {
-                        navTab(index: 0, icon: "house", iconFill: "house.fill", title: "Homepage")
-                        navTab(index: 1, icon: "map", iconFill: "map.fill", title: "Map")
-                        
-                        Spacer().frame(width: 56)
-                        
-                        navTab(index: 2, icon: "chart.bar", iconFill: "chart.bar.fill", title: "Status")
-                        navTab(index: 3, icon: "person", iconFill: "person.fill", title: "Profile")
-                    }
-                    .padding(.horizontal, 28)
-                    .frame(height: 92)
-                }
-                .animation(.spring(response: 0.28, dampingFraction: 0.78), value: selection)
-                
-                Button {
-                    showReport = true
-                } label: {
-                    ZStack {
-                        Circle()
-                            .fill(Color.brown)
-                            .frame(width: 62, height: 62)
-                            .shadow(radius: 5)
-                        
-                        Image(systemName: "plus")
-                            .font(.system(size: 26, weight: .bold))
-                            .foregroundColor(.white)
-                    }
-                }
-                .offset(y: -36)
+                // Custom Tab Bar
+                customTabBar()
             }
-        }
-        .sheet(isPresented: $showReport) {
-            CameraView()
+            .onAppear {
+                loadSampleReports()
+            }
+            // Report Flow: Camera → Map → Confirm → Submit
+            .navigationDestination(isPresented: $showReportFlow) {
+                ReportFlowCameraView()
+            }
         }
     }
     
+    // MARK: - Custom Tab Bar
     
+    @ViewBuilder
+    private func customTabBar() -> some View {
+        ZStack {
+            // Tab Bar Background
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(.white)
+                .shadow(color: .black.opacity(0.1), radius: 10, y: -2)
+                .frame(height: 92)
+                .padding(.horizontal, 18)
+            
+            // Tab Items
+            HStack(spacing: 0) {
+                navTab(index: 0, icon: "house", iconFill: "house.fill", title: "Home")
+                navTab(index: 1, icon: "map", iconFill: "map.fill", title: "Map")
+                
+                Spacer().frame(width: 80) // Space for floating button
+                
+                navTab(index: 2, icon: "chart.bar", iconFill: "chart.bar.fill", title: "Status")
+                navTab(index: 3, icon: "person", iconFill: "person.fill", title: "Profile")
+            }
+            .padding(.horizontal, 28)
+            .frame(height: 92)
+            
+            // Floating Report Button - Starts report flow
+            Button {
+                showReportFlow = true
+            } label: {
+                ZStack {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [Color.brown, Color.brown.opacity(0.8)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 68, height: 68)
+                        .shadow(color: .brown.opacity(0.4), radius: 12, y: 6)
+                    
+                    Image(systemName: "plus")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(.white)
+                }
+            }
+            .offset(y: -40)
+        }
+        .animation(.spring(response: 0.28, dampingFraction: 0.78), value: selection)
+    }
+    
+    // MARK: - Tab Item
     
     @ViewBuilder
     private func navTab(index: Int, icon: String, iconFill: String, title: String) -> some View {
@@ -189,18 +115,18 @@ struct NavBar: View {
                     if isSelected {
                         RoundedRectangle(cornerRadius: 14, style: .continuous)
                             .fill(Color.brown.opacity(0.12))
-                            .frame(width: 44, height: 34)
+                            .frame(width: 48, height: 36)
                             .transition(.scale.combined(with: .opacity))
                     }
                     
                     Image(systemName: isSelected ? iconFill : icon)
                         .font(.system(size: 22, weight: isSelected ? .bold : .regular))
                         .foregroundColor(isSelected ? .brown : .gray)
-                        .scaleEffect(isSelected ? 1.12 : 1.0)
+                        .scaleEffect(isSelected ? 1.1 : 1.0)
                 }
                 
                 Text(title)
-                    .font(.custom("BubblerOne-Regular", size: 14))
+                    .font(.custom("BubblerOne-Regular", size: 13))
                     .foregroundColor(isSelected ? .brown : .gray)
                     .opacity(isSelected ? 1 : 0.8)
             }
@@ -208,6 +134,55 @@ struct NavBar: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+    }
+    
+    // MARK: - Load Sample Data
+    
+    private func loadSampleReports() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        // TODO: Replace with Firestore query in next sprint
+        sampleReports = [
+            Report(
+                id: "report_001",
+                userId: userId,
+                drainId: "drain_nguyen_hue",
+                drainTitle: "Drain near Nguyen Hue Walking Street",
+                drainLatitude: 10.728979,
+                drainLongitude: 106.696641,
+                imageURL: "",
+                description: "Water pooling, trash blocking inlet",
+                userSeverity: "High",
+                trafficImpact: "Slowing",
+                timestamp: Date().addingTimeInterval(-3600),
+                reporterLatitude: 10.728950,
+                reporterLongitude: 106.696620,
+                locationAccuracy: 8.5,
+                status: "Sent"
+            ),
+            Report(
+                id: "report_002",
+                userId: userId,
+                drainId: "drain_le_loi",
+                drainTitle: "Drain at Le Loi Boulevard",
+                drainLatitude: 10.728956,
+                drainLongitude: 106.696412,
+                imageURL: "",
+                description: "Partially blocked by leaves",
+                userSeverity: "Medium",
+                trafficImpact: "Normal",
+                timestamp: Date().addingTimeInterval(-86400),
+                reporterLatitude: 10.728930,
+                reporterLongitude: 106.696400,
+                locationAccuracy: 12.0,
+                isValidated: true,
+                aiSeverity: 3,
+                aiConfidence: 0.87,
+                riskScore: 3.2,
+                status: "In Progress",
+                assignedTo: "operator_001"
+            )
+        ]
     }
 }
 

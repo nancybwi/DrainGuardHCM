@@ -11,10 +11,30 @@ import AVFoundation
 
 class CameraModel: NSObject, ObservableObject {
     @Published var lastPhoto: UIImage? = nil
-    let session = AVCaptureSession()           // removed fileprivate
-    let output = AVCapturePhotoOutput()        // removed fileprivate
+    @Published var cameraError: String?
+    
+    lazy var session: AVCaptureSession = {
+        print("📷 Creating camera session...")
+        return AVCaptureSession()
+    }()
+    
+    lazy var output: AVCapturePhotoOutput = {
+        print("📷 Creating photo output...")
+        return AVCapturePhotoOutput()
+    }()
 
     func capturePhoto() {
+        print("📷 Capture photo requested")
+        
+        // Check if session is running
+        guard session.isRunning else {
+            print("⚠️ Camera session not running!")
+            DispatchQueue.main.async {
+                self.cameraError = "Camera not ready"
+            }
+            return
+        }
+        
         let settings = AVCapturePhotoSettings()
         output.capturePhoto(with: settings, delegate: self)
     }
@@ -24,11 +44,28 @@ extension CameraModel: AVCapturePhotoCaptureDelegate {
     func photoOutput(_ output: AVCapturePhotoOutput,
                      didFinishProcessingPhoto photo: AVCapturePhoto,
                      error: Error?) {
-        guard error == nil,
-              let data = photo.fileDataRepresentation(),
-              let image = UIImage(data: data) else { return }
+        if let error = error {
+            print("⚠️ Photo capture failed: \(error.localizedDescription)")
+            DispatchQueue.main.async {
+                self.cameraError = error.localizedDescription
+            }
+            return
+        }
+        
+        guard let data = photo.fileDataRepresentation(),
+              let image = UIImage(data: data) else {
+            print("⚠️ Could not convert photo data to image")
+            DispatchQueue.main.async {
+                self.cameraError = "Failed to process photo"
+            }
+            return
+        }
+        
         DispatchQueue.main.async {
             self.lastPhoto = image
+            self.cameraError = nil
+            print("📸 Photo captured successfully")
         }
     }
 }
+

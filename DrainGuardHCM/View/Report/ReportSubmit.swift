@@ -7,170 +7,316 @@
 
 import SwiftUI
 import CoreLocation
+import FirebaseAuth
 
 struct ReportSubmitView: View {
-  let image: UIImage
-  let selectedDrain: Drain?
-
-  @StateObject private var locationManager = LocationManager()
-
-  @State private var severity: Severity = .medium
-  @State private var drainNearby: DrainNearby = .unsure
-  @State private var traffic: TrafficImpact = .slowing
-
-  @State private var isSubmitting = false
-  @State private var statusText: String = ""
-
-  var body: some View {
-    ZStack {
-      Color("main").ignoresSafeArea()
-      ScrollView {
-        VStack(spacing: 16) {
-          Text("Submit report")
-            .font(.custom("BubblerOne-Regular", size: 32))
-
-          Image(uiImage: image)
-            .resizable()
-            .scaledToFit()
-            .frame(maxHeight: 260)
-            .cornerRadius(16)
-
-          if let d = selectedDrain {
-            Text("Selected: \(d.title)")
-              .font(.system(size: 14, weight: .semibold))
-          }
-
-          if let coord = locationManager.userLocation {
-            Text("Location: \(coord.latitude), \(coord.longitude)")
-              .font(.system(size: 12))
-              .foregroundStyle(.secondary)
-          } else {
-            Text("Getting your location...")
-              .font(.system(size: 12))
-              .foregroundStyle(.secondary)
-          }
-
-          questionCard(title: "A. How bad is it?") {
-            Picker("", selection: $severity) {
-              ForEach(Severity.allCases) { s in
-                Text(s.rawValue).tag(s)
-              }
+    let image: UIImage
+    let selectedDrain: Drain
+    
+    @StateObject private var locationManager = LocationManager()
+    
+    @State private var severity: Severity = .medium
+    @State private var traffic: TrafficImpact = .slowing
+    @State private var description: String = ""
+    
+    @State private var isSubmitting = false
+    @State private var statusText: String = ""
+    @State private var showSuccess = false
+    
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        ZStack {
+            Color("main").ignoresSafeArea()
+            ScrollView {
+                VStack(spacing: 16) {
+                    Text("Submit report")
+                        .font(.custom("BubblerOne-Regular", size: 32))
+                    
+                    // Image Preview
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxHeight: 260)
+                        .cornerRadius(16)
+                    
+                    // Selected Drain Info
+                    drainInfoCard()
+                    
+                    // Location Info
+                    locationInfoCard()
+                    
+                    // Description Field
+                    questionCard(title: "Describe the problem") {
+                        TextField("e.g., Water pooling, trash blocking drain...", 
+                                  text: $description, 
+                                  axis: .vertical)
+                        .textFieldStyle(.roundedBorder)
+                        .lineLimit(3...6)
+                    }
+                    
+                    // Severity Assessment
+                    questionCard(title: "How bad is the blockage?") {
+                        Picker("", selection: $severity) {
+                            ForEach(Severity.allCases) { s in
+                                Text(s.rawValue).tag(s)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    }
+                    
+                    // Traffic Impact
+                    questionCard(title: "How is traffic affected?") {
+                        Picker("", selection: $traffic) {
+                            ForEach(TrafficImpact.allCases) { t in
+                                Text(t.rawValue).tag(t)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    }
+                    
+                    // Submit Button
+                    Button {
+                        submit()
+                    } label: {
+                        HStack {
+                            if isSubmitting {
+                                ProgressView()
+                                    .tint(.white)
+                            }
+                            Text(isSubmitting ? "Submitting..." : "Submit Report")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(isSubmitting || !locationManager.hasLocation || description.isEmpty)
+                    
+                    if !statusText.isEmpty {
+                        Text(statusText)
+                            .font(.system(size: 12))
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+                .padding(16)
             }
-            .pickerStyle(.segmented)
-          }
-
-          questionCard(title: "B. Do you see a drain nearby?") {
-            Picker("", selection: $drainNearby) {
-              ForEach(DrainNearby.allCases) { x in
-                Text(x.rawValue).tag(x)
-              }
-            }
-            .pickerStyle(.segmented)
-          }
-
-          questionCard(title: "C. Traffic right now?") {
-            Picker("", selection: $traffic) {
-              ForEach(TrafficImpact.allCases) { t in
-                Text(t.rawValue).tag(t)
-              }
-            }
-            .pickerStyle(.segmented)
-          }
-
-          Button {
-            submit()
-          } label: {
-            Text(isSubmitting ? "Submitting..." : "Submit")
-              .frame(maxWidth: .infinity)
-          }
-          .buttonStyle(.borderedProminent)
-          .disabled(isSubmitting || locationManager.userLocation == nil)
-
-          if !statusText.isEmpty {
-            Text(statusText)
-              .font(.system(size: 12))
-              .foregroundStyle(.secondary)
-              .frame(maxWidth: .infinity, alignment: .leading)
-          }
         }
-        .padding(16)
-      }
+        .navigationBarTitleDisplayMode(.inline)
+        .alert("Report Submitted!", isPresented: $showSuccess) {
+            Button("OK") {
+                dismiss()
+            }
+        } message: {
+            Text("Your report has been submitted and will be validated by our AI system.")
+        }
+        .onAppear {
+            // Get single location when form appears (no continuous tracking needed)
+            locationManager.startTracking()
+        }
+        .onDisappear {
+            // Stop tracking when leaving form
+            locationManager.stopTracking()
+        }
     }
-  }
-
-  @ViewBuilder
-  private func questionCard(title: String, @ViewBuilder content: () -> some View) -> some View {
-    VStack(alignment: .leading, spacing: 10) {
-      Text(title).font(.system(size: 14, weight: .semibold))
-      content()
+    
+    // MARK: - UI Components
+    
+    @ViewBuilder
+    private func drainInfoCard() -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "map.fill")
+                    .foregroundStyle(.blue)
+                Text("Selected Drain")
+                    .font(.system(size: 14, weight: .semibold))
+                Spacer()
+            }
+            
+            Text(selectedDrain.title)
+                .font(.system(size: 16, weight: .medium))
+            
+            if let address = selectedDrain.address {
+                Text(address)
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+            }
+            
+            if let district = selectedDrain.district, let ward = selectedDrain.ward {
+                Text("\(ward), \(district)")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(12)
+        .background(Color.white.opacity(0.85))
+        .cornerRadius(14)
     }
-    .padding(12)
-    .background(Color.white.opacity(0.85))
-    .cornerRadius(14)
-  }
-
-  private func submit() {
-    isSubmitting = true
-    statusText = "Creating report..."
-
-    // TODO: call your Firestore + Storage upload here
-    // For now just simulate:
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-      isSubmitting = false
-      statusText = "Submitted. Waiting for AI validation..."
+    
+    @ViewBuilder
+    private func locationInfoCard() -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: locationManager.isAuthorized ? "location.fill" : "location.slash.fill")
+                    .foregroundStyle(locationManager.isAuthorized ? .green : .red)
+                Text("Your Location")
+                    .font(.system(size: 14, weight: .semibold))
+                Spacer()
+            }
+            
+            if let error = locationManager.locationError {
+                HStack {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+                    Text(error)
+                        .font(.system(size: 12))
+                        .foregroundStyle(.red)
+                }
+            } else if let coord = locationManager.userLocation {
+                Text("📍 \(String(format: "%.6f", coord.latitude)), \(String(format: "%.6f", coord.longitude))")
+                    .font(.system(size: 12, design: .monospaced))
+                    .foregroundStyle(.secondary)
+                
+                if let accuracy = locationManager.currentAccuracyMeters {
+                    HStack(spacing: 4) {
+                        Image(systemName: accuracy < 20 ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
+                            .foregroundStyle(accuracy < 20 ? .green : .orange)
+                        Text("Accuracy: ±\(Int(accuracy))m")
+                            .font(.system(size: 11))
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+            } else {
+                HStack {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                    Text("Getting your location...")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding(12)
+        .background(Color.white.opacity(0.85))
+        .cornerRadius(14)
     }
-  }
+    
+    @ViewBuilder
+    private func questionCard(title: String, @ViewBuilder content: () -> some View) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title).font(.system(size: 14, weight: .semibold))
+            content()
+        }
+        .padding(12)
+        .background(Color.white.opacity(0.85))
+        .cornerRadius(14)
+    }
+    
+    // MARK: - Submit Logic
+    
+    private func submit() {
+        guard let userLocation = locationManager.userLocation,
+              let userId = Auth.auth().currentUser?.uid else {
+            statusText = "Error: Not authenticated or no location"
+            return
+        }
+        
+        isSubmitting = true
+        statusText = "Creating report..."
+        
+        // Create report object
+        let report = Report(
+            id: nil, // Firestore will auto-generate
+            userId: userId,
+            drainId: selectedDrain.id ?? UUID().uuidString,
+            drainTitle: selectedDrain.title,
+            drainLatitude: selectedDrain.latitude,
+            drainLongitude: selectedDrain.longitude,
+            imageURL: "", // Will be filled after upload
+            description: description,
+            userSeverity: severity.rawValue,
+            trafficImpact: traffic.rawValue,
+            timestamp: Date(),
+            reporterLatitude: userLocation.latitude,
+            reporterLongitude: userLocation.longitude,
+            locationAccuracy: locationManager.currentAccuracyMeters,
+            isValidated: nil,
+            aiSeverity: nil,
+            aiConfidence: nil,
+            aiProcessedAt: nil,
+            riskScore: nil,
+            riskFactors: nil,
+            status: "Sent",
+            assignedTo: nil,
+            statusUpdatedAt: nil,
+            operatorNotes: nil,
+            afterImageURL: nil,
+            completedAt: nil
+        )
+        
+        // TODO: In next step, we'll add ReportService to:
+        // 1. Upload image to Firebase Storage
+        // 2. Save report to Firestore with imageURL
+        // 3. Trigger AI validation via Cloud Function
+        
+        // For now, simulate submission
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            isSubmitting = false
+            statusText = "✅ Report created (pending upload implementation)"
+            showSuccess = true
+            print("📋 Report ready to submit:", report)
+        }
+    }
 }
 
 
-// Mock image so you can preview the UI without using camera.
-enum MockImageFactory {
-  static func make(width: Int = 900, height: Int = 1200) -> UIImage {
-    let size = CGSize(width: width, height: height)
-    let renderer = UIGraphicsImageRenderer(size: size)
-    return renderer.image { ctx in
-      UIColor.systemGray5.setFill()
-      ctx.fill(CGRect(origin: .zero, size: size))
-
-      let title = "MOCK REPORT"
-      let note = "Water pooling on road\nDrain nearby (maybe)\n2026-01-19 11:00 | GPS acc 8m"
-
-      let a1: [NSAttributedString.Key: Any] = [
-        .font: UIFont.boldSystemFont(ofSize: 56),
-        .foregroundColor: UIColor.black
-      ]
-      let a2: [NSAttributedString.Key: Any] = [
-        .font: UIFont.systemFont(ofSize: 30, weight: .medium),
-        .foregroundColor: UIColor.darkGray
-      ]
-
-      NSString(string: title).draw(at: CGPoint(x: 50, y: 80), withAttributes: a1)
-      NSString(string: note).draw(at: CGPoint(x: 50, y: 170), withAttributes: a2)
-
-      let waterRect = CGRect(x: 70, y: 520, width: size.width - 140, height: 420)
-      UIColor.systemBlue.withAlphaComponent(0.20).setFill()
-      ctx.fill(waterRect)
-      UIColor.systemBlue.withAlphaComponent(0.55).setStroke()
-      ctx.stroke(waterRect)
-
-      let drainRect = CGRect(x: 120, y: 980, width: 260, height: 90)
-      UIColor.black.withAlphaComponent(0.12).setFill()
-      ctx.fill(drainRect)
-      UIColor.black.withAlphaComponent(0.25).setStroke()
-      ctx.stroke(drainRect)
-    }
-  }
-}
-
-// Mock drain for preview (no need to touch your real sampleHazards).
-let previewDrain = Drain(
-  title: "Drain near Nguyen Hue",
-  coordinate: CLLocationCoordinate2D(latitude: 10.7732, longitude: 106.7033)
-)
+// MARK: - Preview
 
 #Preview {
-  ReportSubmitView(
-    image: MockImageFactory.make(),
-    selectedDrain: previewDrain
-  )
+    NavigationStack {
+        ReportSubmitView(
+            image: MockImageFactory.make(),
+            selectedDrain: sampleHazards[0]
+        )
+    }
+}
+
+// MARK: - Mock Image Factory
+
+enum MockImageFactory {
+    static func make(width: Int = 900, height: Int = 1200) -> UIImage {
+        let size = CGSize(width: width, height: height)
+        let renderer = UIGraphicsImageRenderer(size: size)
+        return renderer.image { ctx in
+            UIColor.systemGray5.setFill()
+            ctx.fill(CGRect(origin: .zero, size: size))
+            
+            let title = "MOCK REPORT"
+            let note = "Water pooling on road\nDrain nearby (maybe)\n2026-01-19 11:00 | GPS acc 8m"
+            
+            let a1: [NSAttributedString.Key: Any] = [
+                .font: UIFont.boldSystemFont(ofSize: 56),
+                .foregroundColor: UIColor.black
+            ]
+            let a2: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: 30, weight: .medium),
+                .foregroundColor: UIColor.darkGray
+            ]
+            
+            NSString(string: title).draw(at: CGPoint(x: 50, y: 80), withAttributes: a1)
+            NSString(string: note).draw(at: CGPoint(x: 50, y: 170), withAttributes: a2)
+            
+            let waterRect = CGRect(x: 70, y: 520, width: size.width - 140, height: 420)
+            UIColor.systemBlue.withAlphaComponent(0.20).setFill()
+            ctx.fill(waterRect)
+            UIColor.systemBlue.withAlphaComponent(0.55).setStroke()
+            ctx.stroke(waterRect)
+            
+            let drainRect = CGRect(x: 120, y: 980, width: 260, height: 90)
+            UIColor.black.withAlphaComponent(0.12).setFill()
+            ctx.fill(drainRect)
+            UIColor.black.withAlphaComponent(0.25).setStroke()
+            ctx.stroke(drainRect)
+        }
+    }
 }

@@ -8,6 +8,7 @@ import Foundation
 import FirebaseAuth
 import FirebaseFirestore
 
+@MainActor
 final class SessionManager: ObservableObject {
 
     enum AuthState {
@@ -36,7 +37,6 @@ final class SessionManager: ObservableObject {
         }
     }
 
-    @MainActor
     private func loadRoleAndRoute() async {
         guard let uid = Auth.auth().currentUser?.uid else {
             state = .loggedOut
@@ -58,7 +58,8 @@ final class SessionManager: ObservableObject {
             }
         } catch {
             // If role fetch fails, safest fallback is logged out or user.
-            state = .loggedOut
+            print("⚠️ Failed to load user role: \(error.localizedDescription)")
+            state = .loggedInUser  // Default to user instead of logged out
         }
     }
 
@@ -67,3 +68,4 @@ final class SessionManager: ObservableObject {
         state = .loggedOut
     }
 }
+
