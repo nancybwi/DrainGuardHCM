@@ -62,6 +62,42 @@ struct Report: Codable, Identifiable {
     /// Factors that contributed to risk score
     var riskFactors: RiskFactors?
     
+    // MARK: - Image Processing
+    /// Watermarked image URL
+    var watermarkedImageURL: String?
+    
+    /// Perceptual hash for duplicate detection
+    var imageHash: String?
+    
+    // MARK: - Location Intelligence
+    /// Near school or university
+    var nearSchool: Bool?
+    
+    /// Near hospital
+    var nearHospital: Bool?
+    
+    /// Distance to nearest school (meters)
+    var distanceToSchool: Double?
+    
+    /// Distance to nearest hospital (meters)
+    var distanceToHospital: Double?
+    
+    /// Submitted during rush hour (5-7 PM in HCMC)
+    var submittedDuringRushHour: Bool?
+    
+    /// List of nearby POIs
+    var nearbyPOIs: [String]?
+    
+    // MARK: - Validation Details
+    /// Reason for rejection (if rejected)
+    var validationRejectionReason: String?
+    
+    /// AI detected issue description
+    var detectedIssue: String?
+    
+    /// AI validation reasons
+    var validationReasons: [String]?
+    
     // MARK: - Status & Workflow
     /// Current status in the workflow
     var status: String // "Sent", "Validating", "Validated", "Rejected", "Assigned", "In Progress", "Done"
@@ -187,6 +223,46 @@ extension Report {
         if let risk = riskScore {
             dict["riskScore"] = risk
         }
+        
+        // Image processing fields
+        if let watermarkedURL = watermarkedImageURL {
+            dict["watermarkedImageURL"] = watermarkedURL
+        }
+        if let hash = imageHash {
+            dict["imageHash"] = hash
+        }
+        
+        // Location intelligence fields
+        if let nearSchoolVal = nearSchool {
+            dict["nearSchool"] = nearSchoolVal
+        }
+        if let nearHospitalVal = nearHospital {
+            dict["nearHospital"] = nearHospitalVal
+        }
+        if let schoolDist = distanceToSchool {
+            dict["distanceToSchool"] = schoolDist
+        }
+        if let hospitalDist = distanceToHospital {
+            dict["distanceToHospital"] = hospitalDist
+        }
+        if let rushHour = submittedDuringRushHour {
+            dict["submittedDuringRushHour"] = rushHour
+        }
+        if let pois = nearbyPOIs {
+            dict["nearbyPOIs"] = pois
+        }
+        
+        // Validation details
+        if let rejectionReason = validationRejectionReason {
+            dict["validationRejectionReason"] = rejectionReason
+        }
+        if let issue = detectedIssue {
+            dict["detectedIssue"] = issue
+        }
+        if let reasons = validationReasons {
+            dict["validationReasons"] = reasons
+        }
+        
         if let assignee = assignedTo {
             dict["assignedTo"] = assignee
         }

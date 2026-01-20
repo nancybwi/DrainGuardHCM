@@ -124,7 +124,7 @@ struct ReportSubmitView: View {
                 dismiss()
             }
         } message: {
-            Text("Your report has been submitted and will be validated by our AI system.")
+            Text("Your report has been validated by AI and successfully submitted!")
         }
         .alert("Submission Failed", isPresented: $showError) {
             Button("OK", role: .cancel) {}
