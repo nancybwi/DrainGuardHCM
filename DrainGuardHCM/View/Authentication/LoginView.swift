@@ -82,11 +82,12 @@ struct LoginView: View {
         let db = Firestore.firestore()
         try await db.collection("users").document(uid).setData([
             "email": email,
-            "role": role == "admin" ? "admin" :"user",
+            "role": role == "admin" ? "admin" : "user",
+            "fullName": "Nguyễn Văn A",
+            "username": "user_\(uid.prefix(6))",
+            "phone": "0900 000 000",
+            "district": "Quận 7",
             "createdAt": FieldValue.serverTimestamp()
-            
         ], merge: true)
-        print("Saved user doc OK")
     }
-    
 }
