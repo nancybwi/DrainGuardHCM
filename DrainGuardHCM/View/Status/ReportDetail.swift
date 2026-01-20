@@ -15,6 +15,10 @@ struct ReportDetailView: View {
     @State private var showMap = false
     
     init(report: Report) {
+        print("📋 [ReportDetail] Initializing with report ID: \(report.id ?? "nil")")
+        print("📋 [ReportDetail] Report title: \(report.drainTitle)")
+        print("📋 [ReportDetail] Report status: \(report.status.rawValue)")
+        
         self.report = report
         _region = State(initialValue: MKCoordinateRegion(
             center: CLLocationCoordinate2D(
@@ -27,8 +31,55 @@ struct ReportDetailView: View {
     
     var body: some View {
         ZStack {
-            Color("main").ignoresSafeArea()
+            // Bright background to confirm view is visible
+            Color.orange.ignoresSafeArea()
             
+            VStack(spacing: 20) {
+                Text("🎉 DETAIL VIEW LOADED!")
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color.blue)
+                    .cornerRadius(12)
+                
+                Text("Report ID: \(report.id ?? "Unknown")")
+                    .font(.system(size: 18))
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color.black.opacity(0.3))
+                    .cornerRadius(8)
+                
+                Text("Title: \(report.drainTitle)")
+                    .font(.system(size: 18))
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color.black.opacity(0.3))
+                    .cornerRadius(8)
+                
+                Text("Status: \(report.status.rawValue)")
+                    .font(.system(size: 18))
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color.black.opacity(0.3))
+                    .cornerRadius(8)
+                
+                Spacer().frame(height: 40)
+                
+                Button {
+                    print("📋 [ReportDetail] Close button tapped")
+                    dismiss()
+                } label: {
+                    Text("Close")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(width: 200, height: 50)
+                        .background(Color.red)
+                        .cornerRadius(25)
+                }
+            }
+            .padding(40)
+            
+            /*
             ScrollView {
                 VStack(spacing: 20) {
                     // Header with Close Button
@@ -39,6 +90,7 @@ struct ReportDetailView: View {
                         Spacer()
                         
                         Button {
+                            print("📋 [ReportDetail] Close button tapped")
                             dismiss()
                         } label: {
                             Image(systemName: "xmark.circle.fill")
@@ -87,6 +139,7 @@ struct ReportDetailView: View {
                 }
                 .padding(.bottom, 40)
             }
+            */
         }
     }
     

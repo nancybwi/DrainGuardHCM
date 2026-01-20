@@ -285,10 +285,28 @@ class ReportService: ObservableObject {
                 .getDocuments()
             
             let reports = snapshot.documents.compactMap { doc -> Report? in
-                try? doc.data(as: Report.self)
+                do {
+                    var report = try doc.data(as: Report.self)
+                    // Manually set the document ID if it wasn't populated
+                    if report.id == nil {
+                        report.id = doc.documentID
+                        print("📝 Set report ID: \(doc.documentID)")
+                    }
+                    return report
+                } catch {
+                    print("⚠️ Failed to decode report document \(doc.documentID): \(error.localizedDescription)")
+                    return nil
+                }
             }
             
             print("✅ Fetched \(reports.count) reports")
+            
+            // Debug: Print first report ID
+            if let firstReport = reports.first {
+                print("📋 First report ID: \(firstReport.id ?? "nil")")
+                print("📋 First report title: \(firstReport.drainTitle)")
+            }
+            
             return reports
             
         } catch {

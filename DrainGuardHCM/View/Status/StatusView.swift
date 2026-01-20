@@ -71,6 +71,19 @@ struct StatusView: View {
         .fullScreenCover(isPresented: $showDetail) {
             if let report = selectedReport {
                 ReportDetailView(report: report)
+            } else {
+                VStack {
+                    Text("Error: No report selected")
+                        .font(.largeTitle)
+                        .foregroundColor(.red)
+                    Button("Close") {
+                        showDetail = false
+                    }
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                }
             }
         }
     }
@@ -83,6 +96,7 @@ struct StatusView: View {
             LazyVStack(spacing: 12) {
                 ForEach(filteredReports) { report in
                     Button {
+                        print("📱 [StatusView] Tapped report ID: \(report.id ?? "nil")")
                         selectedReport = report
                         showDetail = true
                     } label: {
@@ -177,6 +191,11 @@ class StatusViewModel: ObservableObject {
                     self.reports = fetchedReports
                     self.isLoading = false
                     print("✅ [StatusView] Loaded \(fetchedReports.count) reports")
+                    
+                    // Debug: Print all report IDs
+                    for (index, report) in fetchedReports.enumerated() {
+                        print("   Report \(index + 1): ID = \(report.id ?? "nil"), Title = \(report.drainTitle)")
+                    }
                 }
             } catch {
                 await MainActor.run {
