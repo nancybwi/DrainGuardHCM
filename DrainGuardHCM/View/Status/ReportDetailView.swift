@@ -11,10 +11,14 @@ import MapKit
 struct ReportDetailView: View {
     let reportId: String
     @EnvironmentObject var reportService: ReportListService
+    @EnvironmentObject var sessionManager: SessionManager
     @Environment(\.dismiss) private var dismiss
     
     @State private var region: MKCoordinateRegion
     @State private var showMap = false
+    @State private var isUpdatingStatus = false
+    @State private var showError = false
+    @State private var errorMessage = ""
     
     // Computed property - always gets latest data
     private var report: Report? {
@@ -56,6 +60,11 @@ struct ReportDetailView: View {
                 
                 // Status Banner
                 statusBanner(report: report)
+                
+                // Admin Status Update Button
+                if sessionManager.userDoc?.role == "admin" {
+                    adminStatusButton(report: report)
+                }
                 
                 // Image Section
                 imageSection(report: report)
@@ -432,6 +441,90 @@ struct ReportDetailView: View {
         )
     }
     
+    
+    // MARK: - Admin Status Button
+    
+    @ViewBuilder
+    private func adminStatusButton(report: Report) -> some View {
+        VStack(spacing: 12) {
+            HStack {
+                Image(systemName: "shield.checkered")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.blue)
+                
+                Text("Admin Controls")
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                
+                Spacer()
+            }
+            
+            // Status update button
+            Button {
+                updateReportStatus(report: report)
+            } label: {
+                HStack(spacing: 12) {
+                    if isUpdatingStatus {
+                        ProgressView()
+                            .scaleEffect(0.9)
+                    } else {
+                        Image(systemName: nextStatusIcon(for: report.status))
+                            .font(.system(size: 18, weight: .semibold))
+                        
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(nextStatusActionTitle(for: report.status))
+                                .font(.system(size: 16, weight: .semibold))
+                            
+                            Text("Current: \(report.status.displayName)")
+                                .font(.caption)
+                                .opacity(0.8)
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    if !isUpdatingStatus {
+                        Image(systemName: "arrow.right.circle.fill")
+                            .font(.system(size: 20))
+                    }
+                }
+                .foregroundColor(.white)
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(nextStatusColor(for: report.status).gradient)
+                )
+            }
+            .disabled(isUpdatingStatus || report.status == .done)
+            .opacity(report.status == .done ? 0.5 : 1.0)
+            
+            if report.status == .done {
+                HStack(spacing: 8) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                    Text("This report is already completed")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                )
+        )
+        .alert("Error", isPresented: $showError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(errorMessage)
+        }
+    }
+    
     // MARK: - Helper Views
     
     private func infoRow(icon: String, iconColor: Color, label: String, value: String) -> some View {
@@ -478,12 +571,113 @@ struct ReportDetailView: View {
             return "Issue has been fixed"
         }
     }
+    
+    // MARK: - Admin Status Update Helpers
+    
+    /// Get the next status after the current one
+    private func nextStatus(for currentStatus: ReportStatus) -> ReportStatus {
+        switch currentStatus {
+        case .pending:
+            return .inProgress
+        case .inProgress:
+            return .done
+        case .done:
+            return .done // Already at final status
+        }
+    }
+    
+    /// Get the action title for the button
+    private func nextStatusActionTitle(for currentStatus: ReportStatus) -> String {
+        switch currentStatus {
+        case .pending:
+            return "Start Working"
+        case .inProgress:
+            return "Mark as Done"
+        case .done:
+            return "Completed"
+        }
+    }
+    
+    /// Get the icon for the next status
+    private func nextStatusIcon(for currentStatus: ReportStatus) -> String {
+        switch currentStatus {
+        case .pending:
+            return "play.circle.fill"
+        case .inProgress:
+            return "checkmark.circle.fill"
+        case .done:
+            return "checkmark.seal.fill"
+        }
+    }
+    
+    /// Get the color for the next status
+    private func nextStatusColor(for currentStatus: ReportStatus) -> Color {
+        switch currentStatus {
+        case .pending:
+            return .blue
+        case .inProgress:
+            return .green
+        case .done:
+            return .gray
+        }
+    }
+    
+    /// Update the report status to the next state
+    private func updateReportStatus(report: Report) {
+        guard let reportId = report.id else {
+            errorMessage = "Invalid report ID"
+            showError = true
+            return
+        }
+        
+        let newStatus = nextStatus(for: report.status)
+        
+        guard newStatus != report.status else {
+            // Already at final status
+            return
+        }
+        
+        isUpdatingStatus = true
+        
+        Task {
+            do {
+                try await reportService.updateReportStatus(reportId: reportId, to: newStatus)
+                print("✅ [ReportDetail] Successfully updated status to \(newStatus.rawValue)")
+                
+                // Status update will be reflected automatically via the listener
+                await MainActor.run {
+                    isUpdatingStatus = false
+                }
+                
+            } catch {
+                print("❌ [ReportDetail] Failed to update status: \(error.localizedDescription)")
+                await MainActor.run {
+                    isUpdatingStatus = false
+                    errorMessage = error.localizedDescription
+                    showError = true
+                }
+            }
+        }
+    }
 }
 
 // MARK: - Preview
 
 #Preview {
-    NavigationStack {
+    let sessionManager = SessionManager()
+    // Simulate admin user
+    sessionManager.userDoc = UserDoc(
+        uid: "admin123",
+        email: "admin@example.com",
+        role: "admin",
+        fullName: "Admin User",
+        username: "admin",
+        phone: "123456789",
+        district: "District 1"
+    )
+    sessionManager.state = .loggedInAdmin
+    
+    return NavigationStack {
         ReportDetailView(
             reportId: "abc123def456",
             initialReport: Report(
@@ -505,5 +699,6 @@ struct ReportDetailView: View {
             )
         )
         .environmentObject(ReportListService())
+        .environmentObject(sessionManager)
     }
 }

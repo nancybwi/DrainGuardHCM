@@ -146,6 +146,7 @@ struct AdminReportDetailView: View {
                 .font(.headline)
                 .foregroundStyle(.secondary)
         }
+        .frame(maxWidth: .infinity)
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 16)

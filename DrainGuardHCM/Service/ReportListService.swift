@@ -171,4 +171,35 @@ class ReportListService: ObservableObject {
         listener?.remove()
         listener = nil
     }
+    
+    /// Update report status (admin only)
+    /// - Parameters:
+    ///   - reportId: The ID of the report to update
+    ///   - newStatus: The new status to set
+    func updateReportStatus(reportId: String, to newStatus: ReportStatus) async throws {
+        print("📊 [ReportListService] Updating report \(reportId) status to \(newStatus.rawValue)")
+        
+        guard isAdmin else {
+            print("❌ [ReportListService] Only admins can update report status")
+            throw NSError(domain: "ReportListService", code: 403, userInfo: [
+                NSLocalizedDescriptionKey: "Only administrators can update report status"
+            ])
+        }
+        
+        let db = Firestore.firestore()
+        let reportRef = db.collection("reports").document(reportId)
+        
+        var updateData: [String: Any] = [
+            "status": newStatus.rawValue,
+            "statusUpdatedAt": Timestamp(date: Date())
+        ]
+        
+        // If status is done, set completedAt
+        if newStatus == .done {
+            updateData["completedAt"] = Timestamp(date: Date())
+        }
+        
+        try await reportRef.updateData(updateData)
+        print("✅ [ReportListService] Successfully updated report status")
+    }
 }
