@@ -7,13 +7,57 @@
 
 import SwiftUI
 
-enum ReportStatus: String, CaseIterable, Identifiable {
-    case pending = "Pending"
-    case inProgress = "In progress"
-    case done = "Done"
+// MARK: - Internal Workflow Status (for logging and internal tracking)
 
+/// Detailed internal status for logging and workflow tracking
+enum WorkflowStatus: String {
+    case sent = "Sent"                      // Initial submission
+    case validating = "Validating"          // AI processing
+    case validated = "Validated"            // AI approved
+    case rejected = "Rejected"              // AI/Admin rejected
+    case assigned = "Assigned"              // Operator assigned
+    case inProgress = "In Progress"         // Operator working on it
+    case done = "Done"                      // Completed
+    
+    /// Map internal workflow status to user-facing ReportStatus
+    var toReportStatus: ReportStatus {
+        switch self {
+        case .sent, .validating:
+            return .pending
+        case .validated, .rejected, .assigned, .inProgress:
+            return .inProgress
+        case .done:
+            return .done
+        }
+    }
+}
+
+// MARK: - User-Facing Report Status (saved to Firebase)
+
+/// User-facing status saved to Firebase
+/// This is what citizens see in the app and what gets saved to Firestore
+enum ReportStatus: String, CaseIterable, Identifiable, Codable {
+    case pending = "Pending"           // Waiting for validation/assignment
+    case inProgress = "In Progress"    // Being worked on by operator
+    case done = "Done"                 // Completed and resolved
+    
     var id: String { rawValue }
+    
+    /// User-friendly display name
+    var displayName: String {
+        rawValue
+    }
+    
+    /// Color coding for status (string format for Report model)
+    var color: String {
+        switch self {
+        case .pending: return "orange"
+        case .inProgress: return "purple"
+        case .done: return "green"
+        }
+    }
 
+    /// Color coding for SwiftUI views
     var activeColor: Color {
         switch self {
         case .pending: return .orange
@@ -21,7 +65,34 @@ enum ReportStatus: String, CaseIterable, Identifiable {
         case .done: return .green
         }
     }
+    
+    /// Icon for each status
+    var icon: String {
+        switch self {
+        case .pending: return "clock"
+        case .inProgress: return "wrench.and.screwdriver"
+        case .done: return "checkmark.circle.fill"
+        }
+    }
+    
+    /// Map old string-based workflow statuses to ReportStatus
+    /// Use this when migrating or reading from logs
+    static func from(workflowStatus: String) -> ReportStatus {
+        switch workflowStatus {
+        case "Sent", "Validating":
+            return .pending
+        case "Validated", "Rejected", "Assigned", "In Progress":
+            return .inProgress
+        case "Done":
+            return .done
+        default:
+            return .pending // Default to pending for unknown states
+        }
+    }
 }
+
+// MARK: - Status Bar View
+
 
 struct StatusBarView: View {
     @Binding var selected: ReportStatus

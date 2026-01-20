@@ -3,6 +3,7 @@
 //  DrainGuardHCM
 //
 //  Created by Assistant on 19/1/26.
+//  Updated: 19/1/26 - Added AI Validation Pipeline
 //
 
 import Foundation
@@ -15,18 +16,54 @@ class ReportServiceCloudinary: ObservableObject {
     
     private let db = Firestore.firestore()
     private let cloudinary = CloudinaryService()
+    private let validationCoordinator = ReportValidationCoordinator()
     
     @Published var uploadProgress: Double = 0
     @Published var uploadError: String?
+    @Published var validationProgress: String = ""
     
-    // MARK: - Upload Image to Cloudinary
+    // MARK: - Complete Submission with AI Validation
     
+    func submitReport(image: UIImage, report: Report) async throws -> String {
+        print("\n🚀 [SUBMIT] Starting report submission with AI validation")
+        
+        guard Auth.auth().currentUser != nil else {
+            throw ReportError.uploadFailed("User not authenticated")
+        }
+        
+        await MainActor.run {
+            self.uploadProgress = 0
+            self.uploadError = nil
+            self.validationProgress = "Starting validation..."
+        }
+        
+        // Use validation coordinator to validate and save
+        let (success, reportId, rejectionReason) = try await validationCoordinator.validateAndSubmit(
+            image: image,
+            report: report
+        )
+        
+        if !success {
+            // Report was rejected
+            throw ReportError.validationFailed(rejectionReason ?? "Report did not pass validation")
+        }
+        
+        guard let reportId = reportId else {
+            throw ReportError.uploadFailed("Failed to get report ID")
+        }
+        
+        print("✅ [SUBMIT] Report submitted successfully with ID: \(reportId)")
+        return reportId
+    }
+    
+    // MARK: - Legacy Methods (kept for backwards compatibility)
+    
+    /// Upload image to Cloudinary (legacy - now handled by validation coordinator)
     func uploadImage(_ image: UIImage, reportId: String) async throws -> String {
         return try await cloudinary.uploadImage(image, reportId: reportId)
     }
     
-    // MARK: - Save Report to Firestore
-    
+    /// Save report to Firestore (legacy - now handled by validation coordinator)
     func saveReport(_ report: Report) async throws -> String {
         print("\n💾 [FIRESTORE] Saving report to Firestore...")
         print("💾 [FIRESTORE] User ID: \(report.userId)")
@@ -41,47 +78,6 @@ class ReportServiceCloudinary: ObservableObject {
         } catch {
             print("❌ [FIRESTORE] Failed: \(error.localizedDescription)\n")
             throw ReportError.firestoreSaveFailed(error.localizedDescription)
-        }
-    }
-    
-    // MARK: - Complete Submission
-    
-    func submitReport(image: UIImage, report: Report) async throws -> String {
-        print("\n🚀 [SUBMIT] Starting report submission")
-        
-        let tempReportId = UUID().uuidString
-        
-        guard Auth.auth().currentUser != nil else {
-            throw ReportError.uploadFailed("User not authenticated")
-        }
-        
-        await MainActor.run {
-            self.uploadProgress = 0
-            self.uploadError = nil
-        }
-        
-        do {
-            // Step 1: Upload image to Cloudinary
-            print("📤 Step 1/2: Uploading to Cloudinary...")
-            let imageURL = try await uploadImage(image, reportId: tempReportId)
-            print("✅ Image URL: \(imageURL)")
-            
-            // Step 2: Save report to Firestore
-            print("💾 Step 2/2: Saving to Firestore...")
-            var reportWithImage = report
-            reportWithImage.imageURL = imageURL
-            
-            let reportId = try await saveReport(reportWithImage)
-            
-            print("✅ Complete submission successful! ID: \(reportId)\n")
-            return reportId
-            
-        } catch {
-            await MainActor.run {
-                self.uploadError = error.localizedDescription
-            }
-            print("❌ Submission failed: \(error.localizedDescription)\n")
-            throw error
         }
     }
     
@@ -115,4 +111,3 @@ class ReportServiceCloudinary: ObservableObject {
         try await db.collection("reports").document(reportId).updateData(updateData)
     }
 }
-

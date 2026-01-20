@@ -61,14 +61,7 @@ struct StatusView: View {
     
     private var filteredReports: [Report] {
         reports.filter { report in
-            switch selectedStatus {
-            case .pending:
-                return report.status == "Sent" || report.status == "Validating"
-            case .inProgress:
-                return report.status == "Validated" || report.status == "Assigned" || report.status == "In Progress"
-            case .done:
-                return report.status == "Done"
-            }
+            report.status == selectedStatus
         }
     }
 }
@@ -92,7 +85,7 @@ struct StatusView: View {
                     reporterLatitude: 10.728950,
                     reporterLongitude: 106.696620,
                     locationAccuracy: 8.5,
-                    status: "Sent"
+                    status: .pending
                 ),
                 Report(
                     id: "def456",
@@ -109,7 +102,7 @@ struct StatusView: View {
                     reporterLatitude: 10.728930,
                     reporterLongitude: 106.696400,
                     locationAccuracy: 12.0,
-                    status: "In Progress"
+                    status: .inProgress
                 ),
                 Report(
                     id: "ghi789",
@@ -127,7 +120,7 @@ struct StatusView: View {
                     reporterLongitude: 106.698060,
                     locationAccuracy: 5.0,
                     riskScore: 2.3,
-                    status: "pending",
+                    status: .done,
                     completedAt: Date().addingTimeInterval(-259200)
                 )
             ]

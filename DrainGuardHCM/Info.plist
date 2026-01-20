@@ -2,11 +2,16 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>Vietnamese</string>
 		<string>en</string>
 	</array>
+	<key>GEMINI_API_KEY</key>
+	<string>AIzaSyDXIlDzDfr_J9A9gnA6t35z2vbeq_P-2PQ</string>
+	<key>GEMINI_MODEL</key>
+	<string>gemini-2.5-flash</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>BubblerOne-Regular.ttf</string>

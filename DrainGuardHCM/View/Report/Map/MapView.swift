@@ -114,13 +114,6 @@ struct MapView: View {
                                     .frame(width: 14, height: 14)
                             }
                             
-                            Text("You are here")
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(.ultraThinMaterial)
-                                .clipShape(Capsule())
                         }
                     }
                 }
