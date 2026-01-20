@@ -294,7 +294,8 @@ struct ReportSubmitView: View {
             aiProcessedAt: nil,
             riskScore: nil,
             riskFactors: nil,
-            status: "Sent",
+            status: .pending,               // User-facing status
+            workflowState: "Sent",          // Internal tracking
             assignedTo: nil,
             statusUpdatedAt: nil,
             operatorNotes: nil,

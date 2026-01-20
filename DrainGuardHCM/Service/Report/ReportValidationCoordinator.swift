@@ -169,12 +169,19 @@ class ReportValidationCoordinator: ObservableObject {
             validatedReport.distanceToHospital = locationIntel.distanceToHospital
             validatedReport.submittedDuringRushHour = locationIntel.submittedDuringRushHour
             validatedReport.nearbyPOIs = locationIntel.nearbyPOIs
-            validatedReport.status = "Validated"
+            
+            // Set status to PENDING after AI validation
+            // Report is validated but waiting for operator assignment
+            validatedReport.status = .pending
+            validatedReport.workflowState = "Validated"  // Internal: AI approved
             
             // Auto-assign if high priority
             if riskEngine.shouldAutoAssign(riskScore: riskScore) {
-                validatedReport.status = "Assigned" // Will need operator assignment logic
+                // For high priority, could auto-assign to operator
+                // Status would change to .inProgress when operator accepts
+                validatedReport.workflowState = "Assigned" // Will need operator assignment logic
                 print("🔴 [VALIDATION] High priority! Should auto-assign to operator")
+                // Note: Status stays .pending until operator actually starts work
             }
             
             // Save to Firebase

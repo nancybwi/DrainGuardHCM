@@ -40,9 +40,6 @@ struct NavBar: View {
                 // Custom Tab Bar
                 customTabBar()
             }
-            .onAppear {
-                loadSampleReports()
-            }
             // Report Flow: Camera → Map → Confirm → Submit
             .navigationDestination(isPresented: $showReportFlow) {
                 ReportFlowCameraView()
@@ -135,56 +132,8 @@ struct NavBar: View {
         }
         .buttonStyle(.plain)
     }
-    
-    // MARK: - Load Sample Data
-    
-    private func loadSampleReports() {
-        guard let userId = Auth.auth().currentUser?.uid else { return }
-        
-        // TODO: Replace with Firestore query in next sprint
-        sampleReports = [
-            Report(
-                id: "report_001",
-                userId: userId,
-                drainId: "drain_nguyen_hue",
-                drainTitle: "Drain near Nguyen Hue Walking Street",
-                drainLatitude: 10.728979,
-                drainLongitude: 106.696641,
-                imageURL: "",
-                description: "Water pooling, trash blocking inlet",
-                userSeverity: "High",
-                trafficImpact: "Slowing",
-                timestamp: Date().addingTimeInterval(-3600),
-                reporterLatitude: 10.728950,
-                reporterLongitude: 106.696620,
-                locationAccuracy: 8.5,
-                status: "Sent"
-            ),
-            Report(
-                id: "report_002",
-                userId: userId,
-                drainId: "drain_le_loi",
-                drainTitle: "Drain at Le Loi Boulevard",
-                drainLatitude: 10.728956,
-                drainLongitude: 106.696412,
-                imageURL: "",
-                description: "Partially blocked by leaves",
-                userSeverity: "Medium",
-                trafficImpact: "Normal",
-                timestamp: Date().addingTimeInterval(-86400),
-                reporterLatitude: 10.728930,
-                reporterLongitude: 106.696400,
-                locationAccuracy: 12.0,
-                isValidated: true,
-                aiSeverity: 3,
-                aiConfidence: 0.87,
-                riskScore: 3.2,
-                status: "In Progress",
-                assignedTo: "operator_001"
-            )
-        ]
-    }
 }
+
 
 #Preview {
     NavBar()

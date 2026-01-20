@@ -11,7 +11,7 @@ struct StatusCardView: View {
     let reportId: String
     let title: String
     let submittedAt: Date
-    let status: String
+    let status: ReportStatus
     let riskScore: Double?
 
     var body: some View {
@@ -68,14 +68,8 @@ struct StatusCardView: View {
     }
     
     private var statusColor: Color {
-        switch status {
-        case "Sent", "Validating": return .orange
-        case "Validated", "Assigned": return .blue
-        case "In Progress": return .purple
-        case "Done": return .green
-        case "Rejected": return .red
-        default: return .gray
-        }
+        // Use the enum's activeColor property
+        status.activeColor
     }
     
     private func riskColor(_ risk: Double) -> Color {
@@ -90,7 +84,7 @@ struct StatusCardView: View {
         reportId: "abc123def",
         title: "Clogged drain near Gate 3 (leaves + rubbish)",
         submittedAt: Date(),
-        status: "Validated",
+        status: .pending,
         riskScore: 4.2
     )
 }
