@@ -30,117 +30,71 @@ struct ReportDetailView: View {
     }
     
     var body: some View {
-        ZStack {
-            // Bright background to confirm view is visible
-            Color.orange.ignoresSafeArea()
-            
-            VStack(spacing: 20) {
-                Text("🎉 DETAIL VIEW LOADED!")
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.blue)
-                    .cornerRadius(12)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                // Header with close button
+                headerSection
                 
-                Text("Report ID: \(report.id ?? "Unknown")")
-                    .font(.system(size: 18))
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.black.opacity(0.3))
-                    .cornerRadius(8)
+                // Status Banner
+                statusBanner
                 
-                Text("Title: \(report.drainTitle)")
-                    .font(.system(size: 18))
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.black.opacity(0.3))
-                    .cornerRadius(8)
+                // Image Section
+                imageSection
                 
-                Text("Status: \(report.status.rawValue)")
-                    .font(.system(size: 18))
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.black.opacity(0.3))
-                    .cornerRadius(8)
+                // Basic Info
+                basicInfoSection
                 
-                Spacer().frame(height: 40)
+                // Location Section
+                locationSection
                 
-                Button {
-                    print("📋 [ReportDetail] Close button tapped")
-                    dismiss()
-                } label: {
-                    Text("Close")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(width: 200, height: 50)
-                        .background(Color.red)
-                        .cornerRadius(25)
+                // Risk Score (if available)
+                if report.riskScore != nil {
+                    riskScoreSection
                 }
+                
+                // Description
+                descriptionSection
+                
+                // Timeline
+                timelineSection
+                
+                Spacer(minLength: 40)
             }
-            .padding(40)
-            
-            /*
-            ScrollView {
-                VStack(spacing: 20) {
-                    // Header with Close Button
-                    HStack {
-                        Text("Report Details")
-                            .font(.custom("BubblerOne-Regular", size: 32))
-                        
-                        Spacer()
-                        
-                        Button {
-                            print("📋 [ReportDetail] Close button tapped")
-                            dismiss()
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .font(.system(size: 30))
-                                .foregroundStyle(.gray)
-                        }
-                    }
-                    .padding(.horizontal)
-                    .padding(.top, 20)
-                    
-                    // Status Banner
-                    statusBanner
-                    
-                    // Report Image
-                    if !report.imageURL.isEmpty {
-                        reportImage
-                    }
-                    
-                    // Basic Info Card
-                    infoCard
-                    
-                    // Location Section (Optional)
-                    if showMap {
-                        locationMap
-                    } else {
-                        Button {
-                            withAnimation {
-                                showMap = true
-                            }
-                        } label: {
-                            HStack {
-                                Image(systemName: "map.fill")
-                                Text("Show Location on Map")
-                                    .font(.system(size: 16, weight: .semibold))
-                            }
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
-                            .cornerRadius(12)
-                            .padding(.horizontal)
-                        }
-                    }
-                    
-                    Spacer(minLength: 40)
-                }
-                .padding(.bottom, 40)
-            }
-            */
+            .padding()
         }
+        .background(Color("main").ignoresSafeArea())
+    }
+    
+    // MARK: - Header Section
+    
+    private var headerSection: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Report Details")
+                    .font(.custom("BubblerOne-Regular", size: 28))
+                    .foregroundStyle(.primary)
+                
+                Text("#\(report.id?.prefix(8) ?? "Unknown")")
+                    .font(.system(size: 14, design: .monospaced))
+                    .foregroundStyle(.secondary)
+            }
+            
+            Spacer()
+            
+            Button {
+                print("📋 [ReportDetail] Close button tapped")
+                dismiss()
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 28))
+                    .foregroundStyle(.gray)
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+        )
     }
     
     // MARK: - Status Banner
@@ -149,12 +103,12 @@ struct ReportDetailView: View {
     private var statusBanner: some View {
         HStack(spacing: 12) {
             Image(systemName: report.status.icon)
-                .font(.system(size: 28))
+                .font(.system(size: 32))
                 .foregroundColor(.white)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(report.status.displayName)
-                    .font(.system(size: 22, weight: .bold))
+                    .font(.system(size: 20, weight: .bold))
                     .foregroundColor(.white)
                 
                 Text(statusDescription(report.status))
@@ -169,151 +123,54 @@ struct ReportDetailView: View {
             RoundedRectangle(cornerRadius: 16)
                 .fill(report.status.activeColor.gradient)
         )
-        .shadow(color: report.status.activeColor.opacity(0.4), radius: 10, y: 5)
-        .padding(.horizontal)
+        .shadow(color: report.status.activeColor.opacity(0.3), radius: 8, y: 4)
     }
     
-    // MARK: - Report Image
+    // MARK: - Image Section
     
-    @ViewBuilder
-    private var reportImage: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Photo")
-                .font(.system(size: 18, weight: .semibold))
-                .padding(.horizontal)
+    private var imageSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Photo Evidence")
+                .font(.headline)
+                .foregroundStyle(.primary)
             
-            AsyncImage(url: URL(string: report.imageURL)) { phase in
-                switch phase {
-                case .empty:
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.gray.opacity(0.2))
-                            .frame(height: 300)
-                        
-                        ProgressView()
-                            .scaleEffect(1.5)
-                    }
-                    
-                case .success(let image):
-                    image
-                        .resizable()
-                        .scaledToFit()
-                        .cornerRadius(16)
-                        .shadow(color: .black.opacity(0.1), radius: 8, y: 4)
-                    
-                case .failure:
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.gray.opacity(0.2))
-                            .frame(height: 300)
-                        
-                        VStack(spacing: 8) {
-                            Image(systemName: "photo.fill")
-                                .font(.system(size: 48))
-                                .foregroundStyle(.secondary)
-                            Text("Failed to load image")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+            if !report.imageURL.isEmpty {
+                AsyncImage(url: URL(string: report.imageURL)) { phase in
+                    switch phase {
+                    case .empty:
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.gray.opacity(0.2))
+                                .frame(height: 300)
+                            ProgressView()
+                                .scaleEffect(1.5)
                         }
-                    }
-                    
-                @unknown default:
-                    EmptyView()
-                }
-            }
-            .padding(.horizontal)
-        }
-    }
-    
-    // MARK: - Info Card
-    
-    @ViewBuilder
-    private var infoCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Report ID
-            HStack {
-                Image(systemName: "number.circle.fill")
-                    .foregroundStyle(.blue)
-                    .font(.system(size: 20))
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Report ID")
-                        .font(.system(size: 13))
-                        .foregroundStyle(.secondary)
-                    Text("#\(report.id?.prefix(8) ?? "Unknown")")
-                        .font(.system(size: 16, weight: .medium, design: .monospaced))
-                }
-            }
-            
-            Divider()
-            
-            // Drain Location
-            HStack {
-                Image(systemName: "mappin.circle.fill")
-                    .foregroundStyle(.red)
-                    .font(.system(size: 20))
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Drain Location")
-                        .font(.system(size: 13))
-                        .foregroundStyle(.secondary)
-                    Text(report.drainTitle)
-                        .font(.system(size: 16, weight: .medium))
-                }
-            }
-            
-            Divider()
-            
-            // Timestamp
-            HStack {
-                Image(systemName: "clock.fill")
-                    .foregroundStyle(.orange)
-                    .font(.system(size: 20))
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Submitted At")
-                        .font(.system(size: 13))
-                        .foregroundStyle(.secondary)
-                    Text(report.timestamp, format: .dateTime.day().month().year().hour().minute())
-                        .font(.system(size: 16, weight: .medium))
-                }
-            }
-            
-            Divider()
-            
-            // Description
-            if !report.description.isEmpty {
-                HStack(alignment: .top) {
-                    Image(systemName: "text.alignleft")
-                        .foregroundStyle(.purple)
-                        .font(.system(size: 20))
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Description")
-                            .font(.system(size: 13))
-                            .foregroundStyle(.secondary)
-                        Text(report.description)
-                            .font(.system(size: 16))
-                    }
-                }
-            }
-            
-            // Risk Score (if available)
-            if let risk = report.riskScore {
-                Divider()
-                
-                HStack {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(riskColor(risk))
-                        .font(.system(size: 20))
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Risk Score")
-                            .font(.system(size: 13))
-                            .foregroundStyle(.secondary)
-                        Text(String(format: "%.1f / 5.0", risk))
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(riskColor(risk))
+                        
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 300)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                        
+                    case .failure:
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.gray.opacity(0.2))
+                                .frame(height: 300)
+                            VStack(spacing: 8) {
+                                Image(systemName: "photo.fill")
+                                    .font(.system(size: 48))
+                                    .foregroundStyle(.secondary)
+                                Text("Failed to load image")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        
+                    @unknown default:
+                        EmptyView()
                     }
                 }
             }
@@ -323,54 +180,237 @@ struct ReportDetailView: View {
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color(.systemBackground))
         )
-        .shadow(color: .black.opacity(0.08), radius: 8, y: 4)
-        .padding(.horizontal)
     }
     
-    // MARK: - Location Map
+    // MARK: - Basic Info Section
     
-    @ViewBuilder
-    private var locationMap: some View {
+    private var basicInfoSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Basic Information")
+                .font(.headline)
+                .foregroundStyle(.primary)
+            
+            // Drain Location
+            infoRow(
+                icon: "mappin.circle.fill",
+                iconColor: .red,
+                label: "Drain Location",
+                value: report.drainTitle
+            )
+            
+            Divider()
+            
+            // Severity
+            infoRow(
+                icon: "exclamationmark.triangle.fill",
+                iconColor: .orange,
+                label: "Severity",
+                value: report.userSeverity
+            )
+            
+            Divider()
+            
+            // Traffic Impact
+            infoRow(
+                icon: "car.fill",
+                iconColor: .blue,
+                label: "Traffic Impact",
+                value: report.trafficImpact
+            )
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+        )
+    }
+    
+    // MARK: - Location Section
+    
+    private var locationSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Image(systemName: "map.fill")
-                    .foregroundStyle(.green)
-                Text("Location on Map")
-                    .font(.system(size: 18, weight: .semibold))
+                Text("Location")
+                    .font(.headline)
+                    .foregroundStyle(.primary)
                 
                 Spacer()
                 
                 Button {
                     withAnimation {
-                        showMap = false
+                        showMap.toggle()
                     }
                 } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(.gray)
+                    HStack(spacing: 4) {
+                        Image(systemName: showMap ? "map.fill" : "map")
+                        Text(showMap ? "Hide Map" : "Show Map")
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.blue)
                 }
             }
             
-            Map(coordinateRegion: .constant(region), annotationItems: [report]) { report in
-                MapMarker(coordinate: CLLocationCoordinate2D(
-                    latitude: report.drainLatitude,
-                    longitude: report.drainLongitude
-                ), tint: .red)
-            }
-            .frame(height: 250)
-            .cornerRadius(12)
-            .disabled(true)
-            
+            // Coordinates
             Text("📍 \(String(format: "%.6f, %.6f", report.drainLatitude, report.drainLongitude))")
                 .font(.system(size: 12, design: .monospaced))
                 .foregroundStyle(.secondary)
+            
+            // Map (if shown)
+            if showMap {
+                Map(initialPosition: .region(
+                    MKCoordinateRegion(
+                        center: report.drainLocation,
+                        span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+                    )
+                )) {
+                    Marker("Drain", coordinate: report.drainLocation)
+                        .tint(.red)
+                }
+                .frame(height: 200)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
         }
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color(.systemBackground))
         )
-        .shadow(color: .black.opacity(0.08), radius: 8, y: 4)
-        .padding(.horizontal)
+    }
+    
+    // MARK: - Risk Score Section
+    
+    private var riskScoreSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Risk Assessment")
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                
+                Spacer()
+                
+                if let risk = report.riskScore {
+                    Text(String(format: "%.1f/5.0", risk))
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(riskColor(risk))
+                }
+            }
+            
+            // Risk level indicator
+            if let risk = report.riskScore {
+                HStack(spacing: 4) {
+                    ForEach(1...5, id: \.self) { level in
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Double(level) <= risk ? riskColor(risk) : Color.gray.opacity(0.2))
+                            .frame(height: 8)
+                    }
+                }
+                
+                // Risk description
+                HStack {
+                    Image(systemName: "info.circle.fill")
+                        .foregroundStyle(riskColor(risk))
+                    Text(riskDescription(risk))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+        )
+    }
+    
+    // MARK: - Description Section
+    
+    private var descriptionSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Description")
+                .font(.headline)
+                .foregroundStyle(.primary)
+            
+            if !report.description.isEmpty {
+                Text(report.description)
+                    .font(.body)
+                    .foregroundStyle(.primary)
+            } else {
+                Text("No description provided")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .italic()
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+        )
+    }
+    
+    // MARK: - Timeline Section
+    
+    private var timelineSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Timeline")
+                .font(.headline)
+                .foregroundStyle(.primary)
+            
+            // Submitted
+            infoRow(
+                icon: "clock.fill",
+                iconColor: .blue,
+                label: "Submitted",
+                value: report.timestamp.formatted(date: .abbreviated, time: .shortened)
+            )
+            
+            // Status Updated (if available)
+            if let statusUpdated = report.statusUpdatedAt {
+                Divider()
+                infoRow(
+                    icon: "clock.arrow.circlepath",
+                    iconColor: .purple,
+                    label: "Last Updated",
+                    value: statusUpdated.formatted(date: .abbreviated, time: .shortened)
+                )
+            }
+            
+            // Completed (if available)
+            if let completed = report.completedAt {
+                Divider()
+                infoRow(
+                    icon: "checkmark.circle.fill",
+                    iconColor: .green,
+                    label: "Completed",
+                    value: completed.formatted(date: .abbreviated, time: .shortened)
+                )
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+        )
+    }
+    
+    // MARK: - Helper Views
+    
+    private func infoRow(icon: String, iconColor: Color, label: String, value: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 20))
+                .foregroundStyle(iconColor)
+                .frame(width: 24)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(label)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(value)
+                    .font(.body)
+                    .foregroundStyle(.primary)
+            }
+        }
     }
     
     // MARK: - Helper Functions
@@ -380,6 +420,13 @@ struct ReportDetailView: View {
         else if risk >= 3.0 { return .orange }
         else if risk >= 2.0 { return .yellow }
         else { return .green }
+    }
+    
+    private func riskDescription(_ risk: Double) -> String {
+        if risk >= 4.0 { return "Critical - High flood risk" }
+        else if risk >= 3.0 { return "High - Moderate flood risk" }
+        else if risk >= 2.0 { return "Medium - Low flood risk" }
+        else { return "Low - Minimal flood risk" }
     }
     
     private func statusDescription(_ status: ReportStatus) -> String {
