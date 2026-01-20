@@ -42,7 +42,10 @@ struct NavBar: View {
             }
             // Report Flow: Camera → Map → Confirm → Submit
             .navigationDestination(isPresented: $showReportFlow) {
-                ReportFlowCameraView()
+                ReportFlowCameraView(
+                    dismissFlow: $showReportFlow,
+                    navigateToTab: $selection
+                )
             }
         }
     }

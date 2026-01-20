@@ -11,6 +11,8 @@ import MapKit
 /// Second step in report flow: Select which drain to report
 struct ReportFlowMapView: View {
     let capturedImage: UIImage
+    @Binding var dismissFlow: Bool
+    @Binding var navigateToTab: Int
     
     @StateObject private var drainService = DrainService()
     @StateObject private var locationManager = LocationManager()
@@ -19,6 +21,7 @@ struct ReportFlowMapView: View {
     @State private var hasCenteredOnUser = false
     @State private var showConfirmation = false
     @State private var proceedToSubmit = false
+    @State private var showCancelConfirmation = false
     
     @Environment(\.dismiss) private var dismiss
     
@@ -104,8 +107,8 @@ struct ReportFlowMapView: View {
                     .font(.headline)
             }
             ToolbarItem(placement: .navigationBarLeading) {
-                Button("Back") {
-                    dismiss()
+                Button("Cancel") {
+                    showCancelConfirmation = true
                 }
             }
         }
@@ -144,9 +147,27 @@ struct ReportFlowMapView: View {
         } message: { drain in
             Text("You selected:\n\(drain.title)\n\n\(drain.address ?? "")\n\nProceed to submit report?")
         }
+        .confirmationDialog(
+            "Cancel Report?",
+            isPresented: $showCancelConfirmation
+        ) {
+            Button("Yes, Cancel Report", role: .destructive) {
+                dismissFlow = false // Dismiss entire flow
+            }
+            Button("No, Go Back", role: .cancel) {
+                dismiss() // Just go back to camera
+            }
+        } message: {
+            Text("Are you sure you want to cancel this report? Your photo will be discarded.")
+        }
         .navigationDestination(isPresented: $proceedToSubmit) {
             if let drain = selectedDrain {
-                ReportSubmitView(image: capturedImage, selectedDrain: drain)
+                ReportSubmitView(
+                    image: capturedImage,
+                    selectedDrain: drain,
+                    dismissFlow: $dismissFlow,
+                    navigateToTab: $navigateToTab
+                )
             }
         }
     }
@@ -213,6 +234,10 @@ struct ReportFlowMapView: View {
 
 #Preview {
     NavigationStack {
-        ReportFlowMapView(capturedImage: MockImageFactory.make())
+        ReportFlowMapView(
+            capturedImage: MockImageFactory.make(),
+            dismissFlow: .constant(true),
+            navigateToTab: .constant(0)
+        )
     }
 }

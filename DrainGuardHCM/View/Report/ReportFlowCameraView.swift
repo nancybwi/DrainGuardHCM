@@ -9,10 +9,14 @@ import SwiftUI
 
 /// First step in report flow: Capture photo
 struct ReportFlowCameraView: View {
+    @Binding var dismissFlow: Bool
+    @Binding var navigateToTab: Int
+    
     @State private var capturedImage: UIImage? = nil
     @StateObject private var cameraModel = CameraModel()
     @State private var goToMapSelection = false
     @State private var isCameraReady = false
+    @State private var showCancelConfirmation = false
     
     @Environment(\.dismiss) private var dismiss
     
@@ -68,7 +72,7 @@ struct ReportFlowCameraView: View {
                 HStack(spacing: 16) {
                     // Cancel
                     Button {
-                        dismiss()
+                        showCancelConfirmation = true
                     } label: {
                         Text("Cancel")
                             .font(.system(size: 16, weight: .semibold))
@@ -104,9 +108,20 @@ struct ReportFlowCameraView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button("Cancel") {
-                    dismiss()
+                    showCancelConfirmation = true
                 }
             }
+        }
+        .confirmationDialog(
+            "Cancel Report?",
+            isPresented: $showCancelConfirmation
+        ) {
+            Button("Yes, Cancel Report", role: .destructive) {
+                dismissFlow = false // Dismiss entire flow
+            }
+            Button("No, Continue", role: .cancel) {}
+        } message: {
+            Text("Are you sure you want to cancel this report? Your photo will be discarded.")
         }
         .onAppear {
             // Initialize camera when view appears
@@ -127,7 +142,11 @@ struct ReportFlowCameraView: View {
         }
         .navigationDestination(isPresented: $goToMapSelection) {
             if let img = capturedImage {
-                ReportFlowMapView(capturedImage: img)
+                ReportFlowMapView(
+                    capturedImage: img,
+                    dismissFlow: $dismissFlow,
+                    navigateToTab: $navigateToTab
+                )
             }
         }
     }
@@ -135,6 +154,9 @@ struct ReportFlowCameraView: View {
 
 #Preview {
     NavigationStack {
-        ReportFlowCameraView()
+        ReportFlowCameraView(
+            dismissFlow: .constant(true),
+            navigateToTab: .constant(0)
+        )
     }
 }

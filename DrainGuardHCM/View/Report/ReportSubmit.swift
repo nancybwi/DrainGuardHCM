@@ -12,6 +12,8 @@ import FirebaseAuth
 struct ReportSubmitView: View {
     let image: UIImage
     let selectedDrain: Drain
+    @Binding var dismissFlow: Bool
+    @Binding var navigateToTab: Int
     
     @StateObject private var locationManager = LocationManager()
     @StateObject private var reportService = ReportServiceCloudinary()  // ← Changed to Cloudinary
@@ -121,15 +123,16 @@ struct ReportSubmitView: View {
         .navigationBarTitleDisplayMode(.inline)
         .alert("Report Submitted!", isPresented: $showSuccess) {
             Button("OK") {
-                dismiss()
+                navigateToTab = 2  // Go to Status tab (index 2)
+                dismissFlow = false  // Dismiss entire flow back to NavBar
             }
         } message: {
-            Text("Your report has been validated by AI and successfully submitted!")
+            Text("Your report has been validated by AI and successfully submitted! Check the Status tab to track it.")
         }
         .alert("Submission Failed", isPresented: $showError) {
-            Button("OK", role: .cancel) {}
-            Button("Retry") {
-                submit()
+            Button("OK", role: .cancel) {
+                navigateToTab = 0  // Go to Home tab
+                dismissFlow = false  // Dismiss entire flow
             }
         } message: {
             Text(errorMessage)
@@ -351,7 +354,9 @@ struct ReportSubmitView: View {
     NavigationStack {
         ReportSubmitView(
             image: MockImageFactory.make(),
-            selectedDrain: sampleHazards[0]
+            selectedDrain: sampleHazards[0],
+            dismissFlow: .constant(true),
+            navigateToTab: .constant(0)
         )
     }
 }
