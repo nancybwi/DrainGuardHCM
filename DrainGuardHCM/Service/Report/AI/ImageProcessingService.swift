@@ -81,7 +81,7 @@ class ImageProcessingService {
             watermarkText.draw(in: textRect, withAttributes: attributes)
         }
         
-        print("✅ [WATERMARK] Watermark added successfully")
+        print("[WATERMARK] Watermark added successfully")
         return watermarkedImage
     }
     
@@ -163,7 +163,7 @@ class ImageProcessingService {
         }
         
         let hashString = String(hash, radix: 16)
-        print("✅ [PHASH] Hash generated: \(hashString)")
+        print("[PHASH] Hash generated: \(hashString)")
         return hashString
     }
     
@@ -232,7 +232,7 @@ class ImageProcessingService {
         
         if let finalData = imageData {
             let sizeKB = finalData.count / 1024
-            print("✅ [COMPRESS] Compressed to \(sizeKB)KB at \(Int(compression * 100))% quality")
+            print("[COMPRESS] Compressed to \(sizeKB)KB at \(Int(compression * 100))% quality")
         }
         
         return imageData

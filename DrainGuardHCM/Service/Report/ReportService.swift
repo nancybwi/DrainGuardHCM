@@ -78,11 +78,11 @@ class ReportService: ObservableObject {
             }
             
             print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-            print("✅ [UPLOAD] Upload completed!")
-            print("✅ [UPLOAD] Uploaded size: \(uploadMetadata.size ?? 0) bytes")
-            print("✅ [UPLOAD] Content type: \(uploadMetadata.contentType ?? "unknown")")
-            print("✅ [UPLOAD] Path: \(uploadMetadata.path ?? "unknown")")
-            print("✅ [UPLOAD] Now fetching download URL...")
+            print("[UPLOAD] Upload completed!")
+            print("[UPLOAD] Uploaded size: \(uploadMetadata.size ?? 0) bytes")
+            print("[UPLOAD] Content type: \(uploadMetadata.contentType ?? "unknown")")
+            print("[UPLOAD] Path: \(uploadMetadata.path ?? "unknown")")
+            print("[UPLOAD] Now fetching download URL...")
             
             // Small delay to ensure Firebase processes the file
             try await Task.sleep(nanoseconds: 500_000_000) // 0.5 second
@@ -92,52 +92,52 @@ class ReportService: ObservableObject {
             var attempts = 0
             let maxAttempts = 3
             
-            print("🔄 [URL] Attempting to get download URL (max \(maxAttempts) attempts)...")
+            print("[URL] Attempting to get download URL (max \(maxAttempts) attempts)...")
             
             while downloadURL == nil && attempts < maxAttempts {
                 do {
                     attempts += 1
-                    print("🔄 [URL] Attempt \(attempts)/\(maxAttempts)...")
+                    print("[URL] Attempt \(attempts)/\(maxAttempts)...")
                     downloadURL = try await imageRef.downloadURL()
-                    print("✅ [URL] SUCCESS on attempt \(attempts)!")
-                    print("✅ [URL] Download URL: \(downloadURL?.absoluteString ?? "nil")")
+                    print("[URL] SUCCESS on attempt \(attempts)!")
+                    print("[URL] Download URL: \(downloadURL?.absoluteString ?? "nil")")
                 } catch let urlError {
-                    print("⚠️ [URL] FAILED on attempt \(attempts)")
-                    print("⚠️ [URL] Error: \(urlError.localizedDescription)")
-                    print("⚠️ [URL] Error type: \(type(of: urlError))")
+                    print("[URL] FAILED on attempt \(attempts)")
+                    print("[URL] Error: \(urlError.localizedDescription)")
+                    print("[URL] Error type: \(type(of: urlError))")
                     
                     // Print more detailed error info
                     if let nsError = urlError as NSError? {
-                        print("⚠️ [URL] Domain: \(nsError.domain)")
-                        print("⚠️ [URL] Code: \(nsError.code)")
-                        print("⚠️ [URL] UserInfo: \(nsError.userInfo)")
+                        print("[URL] Domain: \(nsError.domain)")
+                        print("[URL] Code: \(nsError.code)")
+                        print("[URL] UserInfo: \(nsError.userInfo)")
                     }
                     
                     if attempts < maxAttempts {
-                        print("⚠️ [URL] Waiting 1 second before retry...")
+                        print("[URL] Waiting 1 second before retry...")
                         try await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
                     } else {
-                        print("❌ [URL] All attempts exhausted. Throwing error.")
+                        print("[URL] All attempts exhausted. Throwing error.")
                         throw urlError
                     }
                 }
             }
             
             guard let urlString = downloadURL?.absoluteString else {
-                print("❌ [URL] FATAL: downloadURL is nil even though no error was thrown!")
+                print("[URL] FATAL: downloadURL is nil even though no error was thrown!")
                 throw ReportError.uploadFailed("Could not get download URL")
             }
             
-            print("✅ [UPLOAD] COMPLETE SUCCESS!")
-            print("✅ [UPLOAD] Final URL: \(urlString)")
+            print("[UPLOAD] COMPLETE SUCCESS!")
+            print("[UPLOAD] Final URL: \(urlString)")
             print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
             return urlString
             
         } catch {
             print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-            print("❌ [UPLOAD] FAILED!")
-            print("❌ [UPLOAD] Error: \(error.localizedDescription)")
-            print("❌ [UPLOAD] Error type: \(type(of: error))")
+            print("[UPLOAD] FAILED!")
+            print("[UPLOAD] Error: \(error.localizedDescription)")
+            print("[UPLOAD] Error type: \(type(of: error))")
             
             if let nsError = error as NSError? {
                 print("❌ [UPLOAD] Domain: \(nsError.domain)")
@@ -155,22 +155,22 @@ class ReportService: ObservableObject {
     /// Save report to Firestore
     func saveReport(_ report: Report) async throws -> String {
         print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        print("💾 [FIRESTORE] Saving report to Firestore")
-        print("💾 [FIRESTORE] User ID: \(report.userId)")
-        print("💾 [FIRESTORE] Drain ID: \(report.drainId)")
-        print("💾 [FIRESTORE] Image URL: \(report.imageURL)")
+        print("[FIRESTORE] Saving report to Firestore")
+        print("[FIRESTORE] User ID: \(report.userId)")
+        print("[FIRESTORE] Drain ID: \(report.drainId)")
+        print("[FIRESTORE] Image URL: \(report.imageURL)")
         
         do {
             // Convert report to dictionary
             let reportDict = report.toDictionary()
-            print("💾 [FIRESTORE] Report dictionary keys: \(reportDict.keys.joined(separator: ", "))")
-            print("💾 [FIRESTORE] Dictionary values:")
+            print("[FIRESTORE] Report dictionary keys: \(reportDict.keys.joined(separator: ", "))")
+            print("[FIRESTORE] Dictionary values:")
             for (key, value) in reportDict {
                 print("   - \(key): \(value)")
             }
             
             // Add to Firestore
-            print("💾 [FIRESTORE] Adding document to 'reports' collection...")
+            print("[FIRESTORE] Adding document to 'reports' collection...")
             let docRef = try await db.collection("reports").addDocument(data: reportDict)
             
             print("✅ [FIRESTORE] SUCCESS!")
@@ -202,18 +202,16 @@ class ReportService: ObservableObject {
     /// Complete submission: Upload image, save report with image URL
     func submitReport(image: UIImage, report: Report) async throws -> String {
         print("\n")
-        print("🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀")
-        print("🚀 [SUBMIT] STARTING COMPLETE REPORT SUBMISSION")
-        print("🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀")
+        print("[SUBMIT] STARTING COMPLETE REPORT SUBMISSION")
         
         // Generate report ID first
         let tempReportId = UUID().uuidString
-        print("🚀 [SUBMIT] Generated temp report ID: \(tempReportId)")
+        print("[SUBMIT] Generated temp report ID: \(tempReportId)")
         
         // Check Firebase Auth
         if let currentUser = Auth.auth().currentUser {
-            print("🚀 [SUBMIT] User authenticated: \(currentUser.uid)")
-            print("🚀 [SUBMIT] User email: \(currentUser.email ?? "no email")")
+            print("[SUBMIT] User authenticated: \(currentUser.uid)")
+            print("[SUBMIT] User email: \(currentUser.email ?? "no email")")
         } else {
             print("❌ [SUBMIT] ERROR: No authenticated user!")
             throw ReportError.uploadFailed("User not authenticated")
@@ -227,12 +225,12 @@ class ReportService: ObservableObject {
         
         do {
             // Step 1: Upload image
-            print("🚀 [SUBMIT] ━━━ STEP 1/2: UPLOADING IMAGE ━━━")
+            print("[SUBMIT] ━━━ STEP 1/2: UPLOADING IMAGE ━━━")
             let imageURL = try await uploadImage(image, reportId: tempReportId)
-            print("🚀 [SUBMIT] ✅ Step 1 complete. Image URL: \(imageURL)")
+            print("[SUBMIT] ✅ Step 1 complete. Image URL: \(imageURL)")
             
             // Step 2: Create report with image URL
-            print("🚀 [SUBMIT] ━━━ STEP 2/2: SAVING REPORT ━━━")
+            print("[SUBMIT] ━━━ STEP 2/2: SAVING REPORT ━━━")
             var reportWithImage = report
             reportWithImage.imageURL = imageURL
             
@@ -240,29 +238,25 @@ class ReportService: ObservableObject {
             print("🚀 [SUBMIT] ✅ Step 2 complete. Report ID: \(reportId)")
             
             print("\n")
-            print("✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅")
-            print("✅ [SUBMIT] COMPLETE SUBMISSION SUCCESSFUL!")
-            print("✅ [SUBMIT] Report ID: \(reportId)")
-            print("✅ [SUBMIT] Image URL: \(imageURL)")
-            print("✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅")
+            print("[SUBMIT] COMPLETE SUBMISSION SUCCESSFUL!")
+            print("[SUBMIT] Report ID: \(reportId)")
+            print("[SUBMIT] Image URL: \(imageURL)")
             print("\n")
             
             return reportId
             
         } catch {
             print("\n")
-            print("❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌")
-            print("❌ [SUBMIT] SUBMISSION FAILED!")
-            print("❌ [SUBMIT] Error: \(error.localizedDescription)")
-            print("❌ [SUBMIT] Error type: \(type(of: error))")
+            print("[SUBMIT] SUBMISSION FAILED!")
+            print("[SUBMIT] Error: \(error.localizedDescription)")
+            print("[SUBMIT] Error type: \(type(of: error))")
             
             if let nsError = error as NSError? {
-                print("❌ [SUBMIT] Domain: \(nsError.domain)")
-                print("❌ [SUBMIT] Code: \(nsError.code)")
-                print("❌ [SUBMIT] UserInfo: \(nsError.userInfo)")
+                print("[SUBMIT] Domain: \(nsError.domain)")
+                print("[SUBMIT] Code: \(nsError.code)")
+                print("[SUBMIT] UserInfo: \(nsError.userInfo)")
             }
             
-            print("❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌")
             print("\n")
             
             await MainActor.run {
@@ -329,9 +323,9 @@ class ReportService: ObservableObject {
         operatorNotes: String? = nil
     ) async throws {
         print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        print("🔄 [STATUS UPDATE] Starting status update")
-        print("🔄 [STATUS UPDATE] Report ID: \(reportId)")
-        print("🔄 [STATUS UPDATE] New Status: \(newStatus.rawValue)")
+        print("[STATUS UPDATE] Starting status update")
+        print("[STATUS UPDATE] Report ID: \(reportId)")
+        print("[STATUS UPDATE] New Status: \(newStatus.rawValue)")
         
         var updateData: [String: Any] = [
             "status": newStatus.rawValue,

@@ -49,7 +49,7 @@ class LocationIntelligenceService {
             nearbyPOIs: pois
         )
         
-        print("✅ [LOCATION] Analysis complete")
+        print("[LOCATION] Analysis complete")
         print("   - Near school: \(nearSchool) (\(schoolDistance.map { String(format: "%.0fm", $0) } ?? "N/A"))")
         print("   - Near hospital: \(nearHospital) (\(hospitalDistance.map { String(format: "%.0fm", $0) } ?? "N/A"))")
         print("   - Rush hour: \(isRushHour)")
