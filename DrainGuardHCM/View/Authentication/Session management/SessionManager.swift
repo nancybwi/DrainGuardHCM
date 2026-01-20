@@ -17,6 +17,7 @@ final class SessionManager: ObservableObject {
         case loggedInAdmin
     }
     
+    
     @Published var state: AuthState = .loading
     @Published var userDoc: UserDoc? = nil
     

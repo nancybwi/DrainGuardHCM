@@ -1,0 +1,88 @@
+//
+//  Localizable.strings
+//  DrainGuardHCM
+//
+//  Created by Ho Quang Huy on 20/1/26.
+//
+
+/* Profile */
+"profile.title" = "Profile";
+"profile.no_email" = "No email yet";
+"profile.role_admin" = "Admin";
+"profile.role_user" = "User";
+
+"profile.stats" = "Stats";
+"profile.stats_sent" = "Sent";
+"profile.stats_in_progress" = "In progress";
+"profile.stats_done" = "Completed";
+
+"profile.info" = "Info";
+"profile.phone" = "Phone";
+"profile.district" = "Area";
+
+"profile.settings" = "Settings";
+"profile.language" = "Language";
+"profile.language_sub" = "Switch English/Vietnamese";
+"profile.notifications" = "Notifications";
+"profile.notifications_sub" = "Receive report status updates";
+"profile.share_location" = "Share location";
+"profile.share_location_sub" = "Suggest nearby drains";
+
+"profile.logout" = "Logout";
+
+"lang.en" = "EN";
+"lang.vi" = "VI";
+
+/* Auth */
+"auth.login" = "Login";
+"auth.register" = "Register";
+"auth.email" = "Email";
+"auth.password" = "Password";
+"auth.create_account" = "Create account";
+"auth.have_account_login" = "Already have an account? Login";
+"auth.no_account_register" = "No account? Register";
+
+/* Home */
+"home.hello" = "Hello";
+"home.flood_alert_title" = "Flood alert";
+"home.flood_alert_subtitle" = "3 high-risk spots near you";
+"home.stats_sent" = "Reports sent";
+"home.stats_done" = "Completed";
+"home.recent_reports" = "Recent reports";
+"home.news" = "News";
+"home.quick_actions" = "Quick actions";
+"home.action.flood_map" = "Flood map";
+"home.action.find_route" = "Find route";
+
+/* Common */
+"common.view" = "View";
+"common.see_more" = "See more";
+
+/* Status pills */
+"status.sent" = "Sent";
+"status.in_progress" = "In progress";
+"status.done" = "Done";
+
+/* Report */
+"report.submit" = "Submit report";
+"report.severity" = "How bad is it?";
+"report.drain_nearby" = "Do you see a drain nearby?";
+"report.traffic" = "Traffic right now?";
+
+"option.low" = "Low";
+"option.medium" = "Medium";
+"option.high" = "High";
+
+"option.yes" = "Yes";
+"option.no" = "No";
+"option.unsure" = "Not sure";
+
+"traffic.normal" = "Normal";
+"traffic.slowing" = "Slowing";
+"traffic.blocked" = "Blocked";
+
+/*Navbar*/
+"tab.home" = "Home";
+"tab.map" = "Map";
+"tab.status" = "Status";
+"tab.profile" = "Profile";
