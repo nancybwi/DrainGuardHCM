@@ -22,6 +22,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 struct DrainGuardHCMApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @StateObject private var session = SessionManager()
+    @StateObject private var lang = LanguageManager()
     @AppStorage("hasSeenWelcome") private var hasSeenWelcome: Bool = false
 
     var body: some Scene {
@@ -30,6 +31,8 @@ struct DrainGuardHCMApp: App {
             if hasSeenWelcome {
                 RootView()
                     .environmentObject(session)
+                    .environmentObject(lang)
+                    .environment(\.locale, Locale(identifier: lang.appLanguage))
                     .onAppear() {
                         print("✅ App launched")
                         session.listenAuth()

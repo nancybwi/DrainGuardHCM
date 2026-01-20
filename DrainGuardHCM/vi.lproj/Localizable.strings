@@ -1,0 +1,88 @@
+//
+//  Localizable.strings
+//  DrainGuardHCM
+//
+//  Created by Ho Quang Huy on 20/1/26.
+//
+
+
+/* Profile */
+"profile.title" = "Cá nhân";
+"profile.no_email" = "Chưa có email";
+"profile.role_admin" = "Admin";
+"profile.role_user" = "User";
+
+"profile.stats" = "Thống kê";
+"profile.stats_sent" = "Đã gửi";
+"profile.stats_in_progress" = "Đang xử lý";
+"profile.stats_done" = "Hoàn thành";
+
+"profile.info" = "Thông tin";
+"profile.phone" = "Số điện thoại";
+"profile.district" = "Khu vực";
+
+"profile.settings" = "Cài đặt";
+"profile.language" = "Ngôn ngữ";
+"profile.language_sub" = "Chuyển English/Tiếng Việt";
+"profile.notifications" = "Thông báo";
+"profile.notifications_sub" = "Nhận cập nhật trạng thái báo cáo";
+"profile.share_location" = "Chia sẻ vị trí";
+"profile.share_location_sub" = "Gợi ý cống gần bạn";
+
+"profile.logout" = "Đăng xuất";
+
+"lang.en" = "EN";
+"lang.vi" = "VI";
+
+/* Auth */
+"auth.login" = "Đăng nhập";
+"auth.register" = "Đăng ký";
+"auth.email" = "Email";
+"auth.password" = "Mật khẩu";
+"auth.create_account" = "Tạo tài khoản";
+"auth.have_account_login" = "Đã có tài khoản? Đăng nhập";
+"auth.no_account_register" = "Chưa có tài khoản? Đăng ký";
+
+/* Home */
+"home.hello" = "Xin chào";
+"home.flood_alert_title" = "Cảnh báo ngập";
+"home.flood_alert_subtitle" = "3 điểm nguy cơ cao gần bạn";
+"home.stats_sent" = "Báo cáo đã gửi";
+"home.stats_done" = "Đã hoàn thành";
+"home.recent_reports" = "Báo cáo gần đây";
+"home.news" = "Tin tức";
+"home.quick_actions" = "Hành động nhanh";
+"home.action.flood_map" = "Bản đồ ngập";
+"home.action.find_route" = "Tìm đường";
+
+/* Common */
+"common.view" = "Xem";
+"common.see_more" = "Xem thêm";
+
+/* Status pills */
+"status.sent" = "Đã gửi";
+"status.in_progress" = "Đang xử lý";
+"status.done" = "Hoàn thành";
+
+/* Report */
+"report.submit" = "Gửi báo cáo";
+"report.severity" = "Mức độ ngập?";
+"report.drain_nearby" = "Bạn có thấy cống thoát nước gần đó không?";
+"report.traffic" = "Tình trạng giao thông hiện tại?";
+
+"option.low" = "Nhẹ";
+"option.medium" = "Trung bình";
+"option.high" = "Nặng";
+
+"option.yes" = "Có";
+"option.no" = "Không";
+"option.unsure" = "Không rõ";
+
+"traffic.normal" = "Bình thường";
+"traffic.slowing" = "Di chuyển chậm";
+"traffic.blocked" = "Bị chặn";
+/*Navbar*/
+"tab.home" = "Trang chủ";
+"tab.map" = "Bản đồ";
+"tab.status" = "Trạng thái";
+"tab.profile" = "Cá nhân";

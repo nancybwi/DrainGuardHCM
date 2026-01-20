@@ -5,6 +5,7 @@
 //  Created by Thao Trinh Phuong on 14/1/26.
 //
 
+
 import SwiftUI
 
 struct HomeView: View {
@@ -45,7 +46,7 @@ struct HomeView: View {
     private func headerSection() -> some View {
         HStack {
             VStack(alignment: .leading, spacing: 6) {
-                Text("Xin chào")
+                Text("home.hello")
                     .font(.system(size: 32, weight: .bold))
                 Text("Nguyễn Văn A")
                     .font(.system(size: 18))
@@ -76,10 +77,10 @@ struct HomeView: View {
                     .foregroundStyle(.white)
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Cảnh báo ngập")
+                    Text("home.flood_alert_title")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundStyle(.white)
-                    Text("3 điểm nguy cơ cao gần bạn")
+                    Text("home.flood_alert_subtitle")
                         .font(.system(size: 13))
                         .foregroundStyle(.white.opacity(0.95))
                 }
@@ -89,7 +90,7 @@ struct HomeView: View {
                 Button {
                     // TODO: navigate to flood detail/map
                 } label: {
-                    Text("Xem")
+                    Text("common.view")
                         .font(.system(size: 14, weight: .bold))
                         .padding(.horizontal, 16)
                         .padding(.vertical, 10)
@@ -107,17 +108,17 @@ struct HomeView: View {
     
     private func statsRow() -> some View {
         HStack(spacing: 14) {
-            statCard(number: "12", title: "Báo cáo đã gửi", tint: .primary)
-            statCard(number: "8", title: "Đã hoàn thành", tint: .green)
+            statCard(number: "12", titleKey: "home.stats_sent", tint: .primary)
+            statCard(number: "8", titleKey: "home.stats_done", tint: .green)
         }
     }
     
-    private func statCard(number: String, title: String, tint: Color) -> some View {
+    private func statCard(number: String, titleKey: String, tint: Color) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(number)
                 .font(.system(size: 32, weight: .bold))
                 .foregroundStyle(tint)
-            Text(title)
+            Text(LocalizedStringKey(titleKey))
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(.secondary)
         }
@@ -130,7 +131,7 @@ struct HomeView: View {
     
     private func recentReportsSection() -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Báo cáo gần đây")
+            Text("home.recent_reports")
                 .font(.system(size: 22, weight: .bold))
             
             // TODO: replace with real list
@@ -166,24 +167,24 @@ struct HomeView: View {
     
     private func quickActionsSection() -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Hành động nhanh")
+            Text("home.quick_actions")
                 .font(.system(size: 22, weight: .bold))
             
             HStack(spacing: 14) {
-                actionCard(title: "Bản đồ ngập", icon: "location.circle.fill", filled: true)
-                actionCard(title: "Tìm đường", icon: "paperplane.fill", filled: false)
+                actionCard(titleKey: "home.action.flood_map", icon: "location.circle.fill", filled: true)
+                actionCard(titleKey: "home.action.find_route", icon: "paperplane.fill", filled: false)
             }
         }
     }
     
-    private func actionCard(title: String, icon: String, filled: Bool) -> some View {
+    private func actionCard(titleKey: String, icon: String, filled: Bool) -> some View {
         Button {
             // TODO
         } label: {
             VStack(spacing: 12) {
                 Image(systemName: icon)
                     .font(.system(size: 22, weight: .bold))
-                Text(title)
+                Text(LocalizedStringKey(titleKey))
                     .font(.system(size: 16, weight: .bold))
             }
             .frame(maxWidth: .infinity)
@@ -205,19 +206,19 @@ struct HomeView: View {
         var pill: some View {
             switch self {
             case .sent:
-                return AnyView(pillView(text: "Đã gửi", icon: "clock", bg: Color.blue.opacity(0.18), fg: .blue))
+                return AnyView(pillView(textKey: "status.sent", icon: "clock", bg: Color.blue.opacity(0.18), fg: .blue))
             case .inProgress:
-                return AnyView(pillView(text: "Đang xử lý", icon: "exclamationmark.triangle", bg: Color.orange.opacity(0.18), fg: .orange))
+                return AnyView(pillView(textKey: "status.in_progress", icon: "exclamationmark.triangle", bg: Color.orange.opacity(0.18), fg: .orange))
             case .done:
-                return AnyView(pillView(text: "Hoàn thành", icon: "checkmark.circle", bg: Color.green.opacity(0.18), fg: .green))
+                return AnyView(pillView(textKey: "status.done", icon: "checkmark.circle", bg: Color.green.opacity(0.18), fg: .green))
             }
         }
 
-        private func pillView(text: String, icon: String, bg: Color, fg: Color) -> some View {
+        private func pillView(textKey: String, icon: String, bg: Color, fg: Color) -> some View {
             HStack(spacing: 6) {
                 Image(systemName: icon)
                     .font(.system(size: 12, weight: .semibold))
-                Text(text)
+                Text(LocalizedStringKey(textKey))
                     .font(.system(size: 13, weight: .semibold))
             }
             .padding(.horizontal, 12)
@@ -271,10 +272,10 @@ struct HomeView: View {
     private func newsSection(items: [NewsItem]) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Tin tức")
+                Text("home.news")
                     .font(.system(size: 22, weight: .bold))
                 Spacer()
-                Button("Xem thêm") {
+                Button("common.see_more") {
                     // TODO
                 }
                 .font(.system(size: 14, weight: .semibold))
