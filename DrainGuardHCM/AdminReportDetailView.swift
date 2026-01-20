@@ -22,7 +22,7 @@ struct AdminReportDetailView: View {
                 imageSection
                 
                 // Status Section
-                statusSection
+                operatorStatusSection
                 
                 // Location Section
                 locationSection
@@ -42,8 +42,8 @@ struct AdminReportDetailView: View {
                 // Nearby POIs
                 nearbyPOIsSection
                 
-                // Workflow Information
-                workflowSection
+                // Operator Workflow Information
+                operatorWorkflowSection
                 
                 // Timestamps
                 timestampSection
@@ -131,10 +131,10 @@ struct AdminReportDetailView: View {
         )
     }
     
-    // MARK: - Status
-    private var statusSection: some View {
+    // MARK: - Operator Status
+    private var operatorStatusSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Status Information")
+            Text("Operator Status Information")
                 .font(.headline)
             
             if let workflow = report.workflowState {
@@ -377,12 +377,12 @@ struct AdminReportDetailView: View {
         }
     }
     
-    // MARK: - Workflow
-    private var workflowSection: some View {
+    // MARK: - Operator Workflow
+    private var operatorWorkflowSection: some View {
         Group {
             if report.completedAt != nil || report.afterImageURL != nil {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Completion Details")
+                    Text("Operator Completion Details")
                         .font(.headline)
                     
                     if let completedAt = report.completedAt {
