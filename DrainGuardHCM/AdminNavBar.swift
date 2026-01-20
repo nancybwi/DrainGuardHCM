@@ -1,16 +1,15 @@
 //
-//  NavBar.swift
+//  AdminNavBar.swift
 //  DrainGuardHCM
 //
-//  Created by Thao Trinh Phuong on 14/1/26.
+//  Created by Thao Trinh Phuong on 20/1/26.
+//
 
 import SwiftUI
-import FirebaseAuth
 
-struct NavBar: View {
+struct AdminNavBar: View {
     @State private var selection = 0
-    @State private var showReportFlow = false
-    @State private var sampleReports: [Report] = []
+    @StateObject private var reportService = ReportListService()
     
     var body: some View {
         NavigationStack {
@@ -20,24 +19,30 @@ struct NavBar: View {
                 Group {
                     switch selection {
                     case 0:
-                        HomeView()
+                        StatusView(reports: reportService.reports)
+                            .overlay {
+                                if reportService.isLoading {
+                                    ProgressView("Loading reports...")
+                                        .padding()
+                                        .background(.ultraThinMaterial)
+                                        .cornerRadius(12)
+                                }
+                            }
                     case 1:
-                        MapView()
-                    case 2:
-                        StatusView(reports: sampleReports)
-                    case 3:
                         ProfileView()
                     default:
-                        HomeView()
+                        StatusView(reports: reportService.reports)
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
                 customTabBar()
             }
-           
-            .navigationDestination(isPresented: $showReportFlow) {
-                ReportFlowCameraView()
+            .onAppear {
+                reportService.startListening()
+            }
+            .onDisappear {
+                reportService.stopListening()
             }
         }
     }
@@ -52,38 +57,11 @@ struct NavBar: View {
                 .padding(.horizontal, 18)
             
             HStack(spacing: 0) {
-                navTab(index: 0, icon: "house", iconFill: "house.fill", titleKey: "tab.home")
-                navTab(index: 1, icon: "map", iconFill: "map.fill", titleKey: "tab.map")
-                
-                Spacer().frame(width: 80)
-                
-                navTab(index: 2, icon: "chart.bar", iconFill: "chart.bar.fill", titleKey: "tab.status")
-                navTab(index: 3, icon: "person", iconFill: "person.fill", titleKey: "tab.profile")
+                navTab(index: 0, icon: "chart.bar", iconFill: "chart.bar.fill", titleKey: "tab.status")
+                navTab(index: 1, icon: "person", iconFill: "person.fill", titleKey: "tab.profile")
             }
-            .padding(.horizontal, 28)
+            .padding(.horizontal, 60)
             .frame(height: 92)
-            
-            Button {
-                showReportFlow = true
-            } label: {
-                ZStack {
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [Color.brown, Color.brown.opacity(0.8)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 68, height: 68)
-                        .shadow(color: .brown.opacity(0.4), radius: 12, y: 6)
-                    
-                    Image(systemName: "plus")
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.white)
-                }
-            }
-            .offset(y: -40)
         }
         .animation(.spring(response: 0.28, dampingFraction: 0.78), value: selection)
     }
@@ -120,5 +98,7 @@ struct NavBar: View {
         }
         .buttonStyle(.plain)
     }
-    
 }
+
+
+// ngoại trừ isvalidate, image hash, location accuracy, reporter latitude longlitude, userid, image url, còn lại display hết từ firestore lên

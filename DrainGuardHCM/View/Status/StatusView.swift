@@ -29,13 +29,18 @@ struct StatusView: View {
                     VStack(spacing: 12) {
                         ForEach(filteredReports) { report in
                             if let id = report.id {
-                                StatusCardView(
-                                    reportId: id,
-                                    title: report.drainTitle,
-                                    submittedAt: report.timestamp,
-                                    status: report.status,
-                                    riskScore: report.riskScore
-                                )
+                                NavigationLink {
+                                    AdminReportDetailView(report: report)
+                                } label: {
+                                    StatusCardView(
+                                        reportId: id,
+                                        title: report.drainTitle,
+                                        submittedAt: report.timestamp,
+                                        status: report.status,
+                                        riskScore: report.riskScore
+                                    )
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
                         

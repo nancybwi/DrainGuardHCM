@@ -44,3 +44,5 @@ struct DrainGuardHCMApp: App {
         }
     }
 }
+
+//8h checkin vaf chup hinh avatar ca team, 11h kethuc hackathon, quay tjhu tu pitchinbg , xong an trua va quay ve rehearsal     

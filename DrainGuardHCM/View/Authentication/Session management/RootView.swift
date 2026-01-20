@@ -16,10 +16,9 @@ struct RootView: View {
         case .loggedOut:
             LoginView()
         case .loggedInUser:
-            NavBar() // user navbar
+            NavBar() // citizen navbar with full features
         case .loggedInAdmin:
-            NavBar() // user navbar
-//            AdminHomeView() // hoặc AdminNavBar dev sau
+            AdminNavBar() // admin navbar with status & profile only
         }
     }
 }

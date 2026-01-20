@@ -8,6 +8,17 @@ import Foundation
 import FirebaseAuth
 import FirebaseFirestore
 
+/// User document model from Firestore
+struct UserDoc {
+    let uid: String
+    let email: String
+    let role: String // "user" or "admin"
+    let fullName: String
+    let username: String
+    let phone: String
+    let district: String
+}
+
 final class SessionManager: ObservableObject {
     
     enum AuthState {
