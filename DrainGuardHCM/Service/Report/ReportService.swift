@@ -299,7 +299,7 @@ class ReportService: ObservableObject {
     
     // MARK: - Update Report Status (for operators)
     
-    /// Update report status
+    /// Update report status (legacy string-based method)
     func updateReportStatus(reportId: String, status: String, notes: String? = nil) async throws {
         print("🔄 Updating report \(reportId) to status: \(status)")
         
@@ -317,6 +317,58 @@ class ReportService: ObservableObject {
             print("✅ Report status updated")
         } catch {
             print("❌ Failed to update status: \(error.localizedDescription)")
+            throw ReportError.updateFailed(error.localizedDescription)
+        }
+    }
+    
+    /// Update report status with ReportStatus enum (for admin actions)
+    func updateReportStatus(
+        reportId: String,
+        newStatus: ReportStatus,
+        assignedTo: String? = nil,
+        operatorNotes: String? = nil
+    ) async throws {
+        print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print("🔄 [STATUS UPDATE] Starting status update")
+        print("🔄 [STATUS UPDATE] Report ID: \(reportId)")
+        print("🔄 [STATUS UPDATE] New Status: \(newStatus.rawValue)")
+        
+        var updateData: [String: Any] = [
+            "status": newStatus.rawValue,
+            "statusUpdatedAt": Timestamp(date: Date())
+        ]
+        
+        // If moving to In Progress, assign to admin
+        if newStatus == .inProgress {
+            if let assignedTo = assignedTo {
+                updateData["assignedTo"] = assignedTo
+                print("🔄 [STATUS UPDATE] Assigning to: \(assignedTo)")
+            }
+            updateData["workflowState"] = "In Progress"
+        }
+        
+        // If marking as done, record completion time
+        if newStatus == .done {
+            updateData["completedAt"] = Timestamp(date: Date())
+            updateData["workflowState"] = "Done"
+            print("🔄 [STATUS UPDATE] Marking as completed")
+        }
+        
+        // Add notes if provided
+        if let notes = operatorNotes {
+            updateData["operatorNotes"] = notes
+            print("🔄 [STATUS UPDATE] Adding operator notes")
+        }
+        
+        print("🔄 [STATUS UPDATE] Update data: \(updateData)")
+        
+        do {
+            try await db.collection("reports").document(reportId).updateData(updateData)
+            print("✅ [STATUS UPDATE] Successfully updated to \(newStatus.rawValue)")
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+        } catch {
+            print("❌ [STATUS UPDATE] Failed: \(error.localizedDescription)")
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
             throw ReportError.updateFailed(error.localizedDescription)
         }
     }
