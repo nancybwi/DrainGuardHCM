@@ -13,12 +13,33 @@ struct RootView: View {
         switch session.state {
         case .loading:
             ProgressView()
+            
         case .loggedOut:
             LoginView()
+            
         case .loggedInUser:
-            NavBar() // citizen navbar with full features
+            // Regular user - sees only their own reports
+            if let userDoc = session.userDoc {
+                NavBar(
+                    userId: userDoc.uid,
+                    userRole: userDoc.role
+                )
+            } else {
+                // Fallback if userDoc is nil
+                ProgressView()
+            }
+            
         case .loggedInAdmin:
-            AdminNavBar() // admin navbar with status & profile only
+            // Admin user - sees all reports
+            if let userDoc = session.userDoc {
+                AdminNavBar(
+                    userId: userDoc.uid,
+                    userRole: userDoc.role
+                )
+            } else {
+                // Fallback if userDoc is nil
+                ProgressView()
+            }
         }
     }
 }

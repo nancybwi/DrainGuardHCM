@@ -11,9 +11,5 @@
 	<string>$(GEMINI_API_KEY)</string>
 	<key>GEMINI_MODEL</key>
 	<string>gemini-2.5-flash</string>
-	<key>UIAppFonts</key>
-	<array>
-		<string>BubblerOne-Regular.ttf</string>
-	</array>
 </dict>
 </plist>

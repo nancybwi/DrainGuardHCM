@@ -9,7 +9,10 @@ import SwiftUI
 
 struct AdminNavBar: View {
     @State private var selection = 0
-    @StateObject private var reportService = ReportListService()
+    
+    // User info for role-based access
+    let userId: String
+    let userRole: String
     
     var body: some View {
         NavigationStack {
@@ -19,30 +22,17 @@ struct AdminNavBar: View {
                 Group {
                     switch selection {
                     case 0:
-                        StatusView(reports: reportService.reports)
-                            .overlay {
-                                if reportService.isLoading {
-                                    ProgressView("Loading reports...")
-                                        .padding()
-                                        .background(.ultraThinMaterial)
-                                        .cornerRadius(12)
-                                }
-                            }
+                        // Admin sees all reports
+                        StatusView(userId: userId, userRole: userRole)
                     case 1:
                         ProfileView()
                     default:
-                        StatusView(reports: reportService.reports)
+                        StatusView(userId: userId, userRole: userRole)
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
                 customTabBar()
-            }
-            .onAppear {
-                reportService.startListening()
-            }
-            .onDisappear {
-                reportService.stopListening()
             }
         }
     }

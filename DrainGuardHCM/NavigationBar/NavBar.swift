@@ -10,7 +10,10 @@ import FirebaseAuth
 struct NavBar: View {
     @State private var selection = 0
     @State private var showReportFlow = false
-    @State private var sampleReports: [Report] = []
+    
+    // User info for role-based access
+    let userId: String
+    let userRole: String
     
     var body: some View {
         NavigationStack {
@@ -24,7 +27,7 @@ struct NavBar: View {
                     case 1:
                         MapView()
                     case 2:
-                        StatusView(reports: sampleReports)
+                        StatusView(userId: userId, userRole: userRole)
                     case 3:
                         ProfileView()
                     default:
