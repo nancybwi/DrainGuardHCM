@@ -8,6 +8,7 @@ import SwiftUI
 
 struct RootView: View {
     @EnvironmentObject var session: SessionManager
+    @EnvironmentObject var reportService: ReportListService
     
     var body: some View {
         switch session.state {
@@ -16,6 +17,10 @@ struct RootView: View {
             
         case .loggedOut:
             LoginView()
+                .onAppear {
+                    // Stop listener when logged out
+                    reportService.stopListening()
+                }
             
         case .loggedInUser:
             // Regular user - sees only their own reports
@@ -24,6 +29,11 @@ struct RootView: View {
                     userId: userDoc.uid,
                     userRole: userDoc.role
                 )
+                .onAppear {
+                    // Start listener when user logs in
+                    print("🔥 [RootView] User logged in - starting listener")
+                    reportService.startListening(userId: userDoc.uid, userRole: userDoc.role)
+                }
             } else {
                 // Fallback if userDoc is nil
                 ProgressView()
@@ -36,6 +46,11 @@ struct RootView: View {
                     userId: userDoc.uid,
                     userRole: userDoc.role
                 )
+                .onAppear {
+                    // Start listener when admin logs in
+                    print("🔥 [RootView] Admin logged in - starting listener")
+                    reportService.startListening(userId: userDoc.uid, userRole: userDoc.role)
+                }
             } else {
                 // Fallback if userDoc is nil
                 ProgressView()

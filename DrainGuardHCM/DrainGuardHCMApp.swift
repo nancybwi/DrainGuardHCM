@@ -23,6 +23,7 @@ struct DrainGuardHCMApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @StateObject private var session = SessionManager()
     @StateObject private var lang = LanguageManager()
+    @StateObject private var reportListService = ReportListService()
     @AppStorage("hasSeenWelcome") private var hasSeenWelcome: Bool = false
 
     var body: some Scene {
@@ -32,6 +33,7 @@ struct DrainGuardHCMApp: App {
                 RootView()
                     .environmentObject(session)
                     .environmentObject(lang)
+                    .environmentObject(reportListService)
                     .environment(\.locale, Locale(identifier: lang.appLanguage))
                     .onAppear() {
                         print("✅ App launched")

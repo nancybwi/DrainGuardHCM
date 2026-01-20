@@ -25,6 +25,12 @@ class ReportListService: ObservableObject {
     ///   - userId: The current user's ID
     ///   - userRole: The user's role ("admin" or "user")
     func startListening(userId: String, userRole: String) {
+        // Stop existing listener if any
+        if listener != nil {
+            print("⚠️ [ReportListService] Stopping existing listener before starting new one")
+            stopListening()
+        }
+        
         print("📊 [ReportListService] Starting listener for user: \(userId), role: \(userRole)")
         
         isLoading = true
@@ -63,13 +69,19 @@ class ReportListService: ObservableObject {
                 return
             }
             
-            print("📊 [ReportListService] Received \(documents.count) reports")
+            print("📊 [ReportListService] 🔥 LISTENER TRIGGERED! Received \(documents.count) reports")
             
             self.reports = documents.compactMap { doc -> Report? in
                 self.parseReport(from: doc)
             }
             
-            print("📊 [ReportListService] Successfully parsed \(self.reports.count) reports")
+            print("📊 [ReportListService] ✅ Successfully parsed \(self.reports.count) reports")
+            
+            // Log each report's status for debugging
+            for report in self.reports {
+                print("   📄 Report \(report.id?.prefix(8) ?? "??"): \(report.status.rawValue)")
+            }
+            
             self.isLoading = false
         }
     }

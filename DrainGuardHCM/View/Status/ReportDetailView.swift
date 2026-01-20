@@ -9,55 +9,73 @@ import SwiftUI
 import MapKit
 
 struct ReportDetailView: View {
-    let report: Report
+    let reportId: String
+    @EnvironmentObject var reportService: ReportListService
     @Environment(\.dismiss) private var dismiss
     
     @State private var region: MKCoordinateRegion
     @State private var showMap = false
     
-    init(report: Report) {
-        print("📋 [ReportDetail] Initializing with report ID: \(report.id ?? "nil")")
-        print("📋 [ReportDetail] Report title: \(report.drainTitle)")
-        print("📋 [ReportDetail] Report status: \(report.status.rawValue)")
+    // Computed property - always gets latest data
+    private var report: Report? {
+        reportService.reports.first(where: { $0.id == reportId })
+    }
+    
+    init(reportId: String, initialReport: Report) {
+        print("📋 [ReportDetail] Initializing with report ID: \(reportId)")
+        print("📋 [ReportDetail] Report title: \(initialReport.drainTitle)")
+        print("📋 [ReportDetail] Initial status: \(initialReport.status.rawValue)")
         
-        self.report = report
+        self.reportId = reportId
         _region = State(initialValue: MKCoordinateRegion(
             center: CLLocationCoordinate2D(
-                latitude: report.drainLatitude,
-                longitude: report.drainLongitude
+                latitude: initialReport.drainLatitude,
+                longitude: initialReport.drainLongitude
             ),
             span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
         ))
     }
     
     var body: some View {
+        Group {
+            if let currentReport = report {
+                contentView(for: currentReport)
+            } else {
+                fallbackView
+            }
+        }
+    }
+    
+    // MARK: - Content View
+    
+    private func contentView(for report: Report) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 // Header with close button
-                headerSection
+                headerSection(report: report)
                 
                 // Status Banner
-                statusBanner
+                statusBanner(report: report)
                 
                 // Image Section
-                imageSection
+                imageSection(report: report)
                 
                 // Basic Info
-                basicInfoSection
+                basicInfoSection(report: report)
                 
                 // Location Section
-                locationSection
+                locationSection(report: report)
                 
                 // Risk Score (if available)
                 if report.riskScore != nil {
-                    riskScoreSection
+                    riskScoreSection(report: report)
                 }
                 
                 // Description
-                descriptionSection
+                descriptionSection(report: report)
                 
                 // Timeline
-                timelineSection
+                timelineSection(report: report)
                 
                 Spacer(minLength: 40)
             }
@@ -66,9 +84,29 @@ struct ReportDetailView: View {
         .background(Color("main").ignoresSafeArea())
     }
     
+    // MARK: - Fallback View
+    
+    private var fallbackView: some View {
+        VStack(spacing: 16) {
+            ProgressView()
+                .scaleEffect(1.5)
+            Text("Loading report...")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+            
+            Button("Go Back") {
+                dismiss()
+            }
+            .font(.caption)
+            .foregroundStyle(.blue)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color("main").ignoresSafeArea())
+    }
+    
     // MARK: - Header Section
     
-    private var headerSection: some View {
+    private func headerSection(report: Report) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Report Details")
@@ -101,7 +139,7 @@ struct ReportDetailView: View {
     // MARK: - Status Banner
     
     @ViewBuilder
-    private var statusBanner: some View {
+    private func statusBanner(report: Report) -> some View {
         HStack(spacing: 12) {
             Image(systemName: report.status.icon)
                 .font(.system(size: 32))
@@ -129,7 +167,7 @@ struct ReportDetailView: View {
     
     // MARK: - Image Section
     
-    private var imageSection: some View {
+    private func imageSection(report: Report) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Photo Evidence")
                 .font(.headline)
@@ -185,7 +223,7 @@ struct ReportDetailView: View {
     
     // MARK: - Basic Info Section
     
-    private var basicInfoSection: some View {
+    private func basicInfoSection(report: Report) -> some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Basic Information")
                 .font(.headline)
@@ -228,7 +266,7 @@ struct ReportDetailView: View {
     
     // MARK: - Location Section
     
-    private var locationSection: some View {
+    private func locationSection(report: Report) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("Location")
@@ -280,7 +318,7 @@ struct ReportDetailView: View {
     
     // MARK: - Risk Score Section
     
-    private var riskScoreSection: some View {
+    private func riskScoreSection(report: Report) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("Risk Assessment")
@@ -325,7 +363,7 @@ struct ReportDetailView: View {
     
     // MARK: - Description Section
     
-    private var descriptionSection: some View {
+    private func descriptionSection(report: Report) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Description")
                 .font(.headline)
@@ -351,7 +389,7 @@ struct ReportDetailView: View {
     
     // MARK: - Timeline Section
     
-    private var timelineSection: some View {
+    private func timelineSection(report: Report) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Timeline")
                 .font(.headline)
@@ -447,7 +485,8 @@ struct ReportDetailView: View {
 #Preview {
     NavigationStack {
         ReportDetailView(
-            report: Report(
+            reportId: "abc123def456",
+            initialReport: Report(
                 id: "abc123def456",
                 userId: "user123",
                 drainId: "drain001",
@@ -465,5 +504,6 @@ struct ReportDetailView: View {
                 status: .pending
             )
         )
+        .environmentObject(ReportListService())
     }
 }

@@ -9,7 +9,7 @@ import FirebaseAuth
 
 struct StatusView: View {
     @State private var selectedStatus: ReportStatus = .pending
-    @StateObject private var reportService = ReportListService()
+    @EnvironmentObject var reportService: ReportListService
     
     let userId: String
     let userRole: String
@@ -64,7 +64,7 @@ struct StatusView: View {
                                         if userRole == "admin" {
                                             AdminReportDetailView(report: report)
                                         } else {
-                                            ReportDetailView(report: report)
+                                            ReportDetailView(reportId: id, initialReport: report)
                                         }
                                     } label: {
                                         StatusCardView(
@@ -98,14 +98,6 @@ struct StatusView: View {
                 Spacer()
             }
         }
-        .onAppear {
-            print("📊 [StatusView] View appeared - starting listener")
-            reportService.startListening(userId: userId, userRole: userRole)
-        }
-        .onDisappear {
-            print("📊 [StatusView] View disappeared - stopping listener")
-            reportService.stopListening()
-        }
     }
     
     private var filteredReports: [Report] {
@@ -121,5 +113,6 @@ struct StatusView: View {
             userId: "user001",
             userRole: "user"
         )
+        .environmentObject(ReportListService())
     }
 }

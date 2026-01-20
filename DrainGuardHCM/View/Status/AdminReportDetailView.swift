@@ -16,12 +16,20 @@ struct AdminReportDetailView: View {
     // Service for updating report status
     @StateObject private var reportService = ReportService()
     
+    // Service for real-time updates
+    @EnvironmentObject var reportListService: ReportListService
+    
     // State for action buttons
     @State private var isUpdating = false
     @State private var showConfirmation = false
     @State private var actionType: ActionType = .startWork
     @State private var showSuccessMessage = false
     @State private var successMessage = ""
+    
+    // Real-time report data
+    private var liveReport: Report {
+        reportListService.reports.first(where: { $0.id == report.id }) ?? report
+    }
     
     enum ActionType {
         case startWork
@@ -87,14 +95,14 @@ struct AdminReportDetailView: View {
                     timestampSection
                     
                     // Add space for floating button
-                    Spacer(minLength: report.status != .done ? 100 : 40)
+                    Spacer(minLength: liveReport.status != .done ? 100 : 40)
                 }
                 .padding()
             }
             .background(Color("main").ignoresSafeArea())
             
             // Floating action button (only show if not done)
-            if report.status != .done {
+            if liveReport.status != .done {
                 adminActionButton
                     .padding()
                     .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -125,7 +133,7 @@ struct AdminReportDetailView: View {
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Report #\(report.id?.prefix(8) ?? "N/A")")
+                Text("Report #\(liveReport.id?.prefix(8) ?? "N/A")")
                     .font(.custom("BubblerOne-Regular", size: 28))
                     .foregroundStyle(.primary)
                 
@@ -134,7 +142,7 @@ struct AdminReportDetailView: View {
                 statusBadge
             }
             
-            Text(report.drainTitle)
+            Text(liveReport.drainTitle)
                 .font(.headline)
                 .foregroundStyle(.secondary)
         }
@@ -146,12 +154,12 @@ struct AdminReportDetailView: View {
     }
     
     private var statusBadge: some View {
-        Text(report.status.rawValue)
+        Text(liveReport.status.rawValue)
             .font(.caption.weight(.semibold))
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
-            .background(report.status.activeColor.opacity(0.15))
-            .foregroundStyle(report.status.activeColor)
+            .background(liveReport.status.activeColor.opacity(0.15))
+            .foregroundStyle(liveReport.status.activeColor)
             .clipShape(Capsule())
     }
     
@@ -542,9 +550,9 @@ struct AdminReportDetailView: View {
     private var adminActionButton: some View {
         Button {
             // Determine action based on current status
-            if report.status == .pending {
+            if liveReport.status == .pending {
                 actionType = .startWork
-            } else if report.status == .inProgress {
+            } else if liveReport.status == .inProgress {
                 actionType = .markDone
             }
             showConfirmation = true
@@ -554,9 +562,9 @@ struct AdminReportDetailView: View {
                     ProgressView()
                         .tint(.white)
                 } else {
-                    Image(systemName: report.status == .pending ? "play.circle.fill" : "checkmark.circle.fill")
+                    Image(systemName: liveReport.status == .pending ? "play.circle.fill" : "checkmark.circle.fill")
                         .font(.title3)
-                    Text(report.status == .pending ? "Start Working" : "Mark as Done")
+                    Text(liveReport.status == .pending ? "Start Working" : "Mark as Done")
                         .font(.headline)
                 }
             }
@@ -564,7 +572,7 @@ struct AdminReportDetailView: View {
             .padding(.vertical, 16)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(report.status == .pending ? Color.blue : Color.green)
+                    .fill(liveReport.status == .pending ? Color.blue : Color.green)
                     .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
             )
             .foregroundColor(.white)
@@ -682,5 +690,6 @@ struct AdminReportDetailView: View {
                 status: .pending
             )
         )
+        .environmentObject(ReportListService())
     }
 }
