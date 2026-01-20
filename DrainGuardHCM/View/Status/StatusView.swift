@@ -2,128 +2,212 @@
 //  StatusView.swift
 //  DrainGuardHCM
 //
-//  Created by Thao Trinh Phuong on 18/1/26.
+//  Created by Thao Trinh Phuong on 20/1/26.
 //
+
 import SwiftUI
+import FirebaseAuth
 
 struct StatusView: View {
-    @State private var selectedStatus: ReportStatus = .pending
+    @StateObject private var viewModel = StatusViewModel()
+    let reports: [Report] // Placeholder - will be replaced by viewModel data
     
-    // Supply your data here (from database or network)
-    let reports: [Report]
+    @State private var selectedStatus: ReportStatus = .pending
+    @State private var showAllReports = true
+    @State private var selectedReport: Report? = nil
+    @State private var showDetail = false
     
     var body: some View {
         ZStack {
             Color("main").ignoresSafeArea()
             
             VStack(spacing: 16) {
+                // Header
                 Text("My Reports")
-                    .font(.custom("BubblerOne-Regular", size: 40))
-                    .padding(.top)
-                
-                StatusBarView(selected: $selectedStatus)
+                    .font(.custom("BubblerOne-Regular", size: 36))
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal)
+                    .padding(.top, 20)
                 
-                // Filter reports by status
-                ScrollView {
-                    VStack(spacing: 12) {
-                        ForEach(filteredReports) { report in
-                            if let id = report.id {
-                                StatusCardView(
-                                    reportId: id,
-                                    title: report.drainTitle,
-                                    submittedAt: report.timestamp,
-                                    status: report.status,
-                                    riskScore: report.riskScore
-                                )
-                            }
-                        }
-                        
-                        if filteredReports.isEmpty {
-                            VStack(spacing: 12) {
-                                Image(systemName: "tray")
-                                    .font(.system(size: 48))
-                                    .foregroundStyle(.secondary)
-                                Text("No \(selectedStatus.rawValue.lowercased()) reports")
-                                    .font(.headline)
-                                    .foregroundStyle(.secondary)
-                            }
-                            .padding(.top, 60)
-                        }
+                // All Reports Toggle Button
+                Button {
+                    withAnimation {
+                        showAllReports.toggle()
                     }
+                } label: {
+                    HStack {
+                        Image(systemName: showAllReports ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
+                        Text(showAllReports ? "Showing All Reports" : "Filter by Status")
+                            .font(.system(size: 14, weight: .medium))
+                    }
+                    .foregroundColor(showAllReports ? .blue : .gray)
                     .padding(.horizontal)
+                }
+                
+                // Status Bar (only show when not showing all)
+                if !showAllReports {
+                    StatusBarView(selected: $selectedStatus)
+                        .padding(.horizontal)
+                }
+                
+                // Reports List
+                if viewModel.isLoading {
+                    loadingView
+                } else if viewModel.reports.isEmpty {
+                    emptyStateView
+                } else {
+                    reportsList
                 }
                 
                 Spacer()
             }
         }
+        .onAppear {
+            viewModel.fetchReports()
+        }
+        .refreshable {
+            await viewModel.refreshReports()
+        }
+        .fullScreenCover(isPresented: $showDetail) {
+            if let report = selectedReport {
+                ReportDetailView(report: report)
+            }
+        }
     }
     
+    // MARK: - Reports List
+    
+    @ViewBuilder
+    private var reportsList: some View {
+        ScrollView {
+            LazyVStack(spacing: 12) {
+                ForEach(filteredReports) { report in
+                    Button {
+                        selectedReport = report
+                        showDetail = true
+                    } label: {
+                        StatusCardView(
+                            reportId: report.id ?? "Unknown",
+                            title: report.drainTitle,
+                            submittedAt: report.timestamp,
+                            status: report.status,
+                            riskScore: report.riskScore
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 100) // Space for tab bar
+        }
+    }
+    
+    // MARK: - Loading View
+    
+    @ViewBuilder
+    private var loadingView: some View {
+        VStack(spacing: 16) {
+            ProgressView()
+                .scaleEffect(1.5)
+            Text("Loading your reports...")
+                .font(.system(size: 16))
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxHeight: .infinity)
+    }
+    
+    // MARK: - Empty State
+    
+    @ViewBuilder
+    private var emptyStateView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "tray.fill")
+                .font(.system(size: 64))
+                .foregroundStyle(.secondary)
+            
+            Text("No Reports Yet")
+                .font(.custom("BubblerOne-Regular", size: 28))
+            
+            Text("Tap the + button to submit your first drain report")
+                .font(.system(size: 16))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+        }
+        .frame(maxHeight: .infinity)
+    }
+    
+    // MARK: - Computed Properties
+    
     private var filteredReports: [Report] {
-        reports.filter { report in
-            report.status == selectedStatus
+        if showAllReports {
+            return viewModel.reports
+        } else {
+            return viewModel.reports.filter { $0.status == selectedStatus }
+        }
+    }
+}
+
+// MARK: - View Model
+
+@MainActor
+class StatusViewModel: ObservableObject {
+    @Published var reports: [Report] = []
+    @Published var isLoading = false
+    @Published var errorMessage: String?
+    
+    private let reportService = ReportService()
+    
+    func fetchReports() {
+        guard !isLoading else { return }
+        guard let userId = Auth.auth().currentUser?.uid else {
+            print("⚠️ [StatusView] No authenticated user")
+            return
+        }
+        
+        isLoading = true
+        errorMessage = nil
+        
+        Task {
+            do {
+                print("📥 [StatusView] Fetching reports for user: \(userId)")
+                let fetchedReports = try await reportService.fetchUserReports(userId: userId)
+                
+                await MainActor.run {
+                    self.reports = fetchedReports
+                    self.isLoading = false
+                    print("✅ [StatusView] Loaded \(fetchedReports.count) reports")
+                }
+            } catch {
+                await MainActor.run {
+                    self.errorMessage = error.localizedDescription
+                    self.isLoading = false
+                    print("❌ [StatusView] Error loading reports: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
+    func refreshReports() async {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        do {
+            print("🔄 [StatusView] Refreshing reports...")
+            let fetchedReports = try await reportService.fetchUserReports(userId: userId)
+            
+            await MainActor.run {
+                self.reports = fetchedReports
+                print("✅ [StatusView] Refreshed \(fetchedReports.count) reports")
+            }
+        } catch {
+            await MainActor.run {
+                self.errorMessage = error.localizedDescription
+                print("❌ [StatusView] Error refreshing: \(error.localizedDescription)")
+            }
         }
     }
 }
 
 #Preview {
-    NavigationStack {
-        StatusView(
-            reports: [
-                Report(
-                    id: "abc123",
-                    userId: "user001",
-                    drainId: "drain1",
-                    drainTitle: "Drain near Nguyen Hue Walking Street",
-                    drainLatitude: 10.728979,
-                    drainLongitude: 106.696641,
-                    imageURL: "",
-                    description: "Water pooling after rain",
-                    userSeverity: "High",
-                    trafficImpact: "Slowing",
-                    timestamp: Date(),
-                    reporterLatitude: 10.728950,
-                    reporterLongitude: 106.696620,
-                    locationAccuracy: 8.5,
-                    status: .pending
-                ),
-                Report(
-                    id: "def456",
-                    userId: "user001",
-                    drainId: "drain2",
-                    drainTitle: "Drain at Le Loi Boulevard",
-                    drainLatitude: 10.728956,
-                    drainLongitude: 106.696412,
-                    imageURL: "",
-                    description: "Blocked by trash",
-                    userSeverity: "Medium",
-                    trafficImpact: "Normal",
-                    timestamp: Date().addingTimeInterval(-86400),
-                    reporterLatitude: 10.728930,
-                    reporterLongitude: 106.696400,
-                    locationAccuracy: 12.0,
-                    status: .inProgress
-                ),
-                Report(
-                    id: "ghi789",
-                    userId: "user001",
-                    drainId: "drain3",
-                    drainTitle: "Drain near Ben Thanh Market",
-                    drainLatitude: 10.772599,
-                    drainLongitude: 106.698074,
-                    imageURL: "",
-                    description: "Fixed last week",
-                    userSeverity: "Low",
-                    trafficImpact: "Normal",
-                    timestamp: Date().addingTimeInterval(-604800),
-                    reporterLatitude: 10.772580,
-                    reporterLongitude: 106.698060,
-                    locationAccuracy: 5.0,
-                    riskScore: 2.3,
-                    status: .done,
-                    completedAt: Date().addingTimeInterval(-259200)
-                )
-            ]
-        )
-    }
+    StatusView(reports: [])
 }
