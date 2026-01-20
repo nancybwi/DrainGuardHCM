@@ -8,5 +8,5 @@
 // Configuration settings file format documentation can be found at:
 // https://developer.apple.com/documentation/xcode/adding-a-build-configuration-file-to-your-project
 
-GEMINI_API_KEY=AIzaSyCFfhXjZQTwdkqYSHJf4XoZISVJxLNekEs
+GEMINI_API_KEY=AIzaSyAZES_mshakIvhktJKQl6mqN3LOF2ud_-E
 GEMINI_MODEL=gemini-2.5-flash

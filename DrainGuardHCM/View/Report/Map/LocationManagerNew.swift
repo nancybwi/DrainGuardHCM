@@ -162,30 +162,30 @@ extension LocationManager: CLLocationManagerDelegate {
                 print("📍 Waiting for user to grant permission...")
                 
             case .authorizedWhenInUse:
-                print("📍 ✅ Authorized 'When In Use'")
+                print(" Authorized 'When In Use'")
                 // Auto-start if we were trying to track
                 if self.isTracking {
                     manager.startUpdatingLocation()
                 }
                 
             case .authorizedAlways:
-                print("📍 ✅ Authorized 'Always' (more than needed)")
+                print("Authorized 'Always' (more than needed)")
                 if self.isTracking {
                     manager.startUpdatingLocation()
                 }
                 
             case .denied:
-                print("⚠️ ❌ User denied location access")
+                print("User denied location access")
                 self.locationError = "Location denied. Enable in Settings → DrainGuard → Location"
                 self.isTracking = false
                 
             case .restricted:
-                print("⚠️ ❌ Location restricted (parental controls?)")
+                print("Location restricted (parental controls?)")
                 self.locationError = "Location access is restricted"
                 self.isTracking = false
                 
             @unknown default:
-                print("⚠️ Unknown authorization status")
+                print("Unknown authorization status")
             }
         }
     }

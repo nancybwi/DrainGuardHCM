@@ -7,54 +7,118 @@
 
 import SwiftUI
 import MapKit
+import FirebaseAuth
 
 struct AdminReportDetailView: View {
     let report: Report
     @Environment(\.dismiss) private var dismiss
     
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                // Header with report ID
-                headerSection
-                
-                // Image Section (watermarked if available)
-                imageSection
-                
-                // Status Section
-                operatorStatusSection
-                
-                // Location Section
-                locationSection
-                
-                // Description & User Assessment
-                userReportSection
-                
-                // AI Validation Results
-                aiValidationSection
-                
-                // Risk Assessment
-                riskAssessmentSection
-                
-                // Location Intelligence
-                locationIntelligenceSection
-                
-                // Nearby POIs
-                nearbyPOIsSection
-                
-                // Operator Workflow Information
-                operatorWorkflowSection
-                
-                // Timestamps
-                timestampSection
-                
-                Spacer(minLength: 40)
+    // Service for updating report status
+    @StateObject private var reportService = ReportService()
+    
+    // State for action buttons
+    @State private var isUpdating = false
+    @State private var showConfirmation = false
+    @State private var actionType: ActionType = .startWork
+    @State private var showSuccessMessage = false
+    @State private var successMessage = ""
+    
+    enum ActionType {
+        case startWork
+        case markDone
+        
+        var title: String {
+            switch self {
+            case .startWork: return "Start Working?"
+            case .markDone: return "Mark as Done?"
             }
-            .padding()
         }
-        .background(Color("main").ignoresSafeArea())
+        
+        var message: String {
+            switch self {
+            case .startWork: return "This will move the report to In Progress and assign it to you."
+            case .markDone: return "This will mark the report as completed."
+            }
+        }
+        
+        var buttonText: String {
+            switch self {
+            case .startWork: return "Start"
+            case .markDone: return "Complete"
+            }
+        }
+    }
+    
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    // Header with report ID
+                    headerSection
+                    
+                    // Image Section (watermarked if available)
+                    imageSection
+                    
+                    // Status Section
+                    operatorStatusSection
+                    
+                    // Location Section
+                    locationSection
+                    
+                    // Description & User Assessment
+                    userReportSection
+                    
+                    // AI Validation Results
+                    aiValidationSection
+                    
+                    // Risk Assessment
+                    riskAssessmentSection
+                    
+                    // Location Intelligence
+                    locationIntelligenceSection
+                    
+                    // Nearby POIs
+                    nearbyPOIsSection
+                    
+                    // Operator Workflow Information
+                    operatorWorkflowSection
+                    
+                    // Timestamps
+                    timestampSection
+                    
+                    // Add space for floating button
+                    Spacer(minLength: report.status != .done ? 100 : 40)
+                }
+                .padding()
+            }
+            .background(Color("main").ignoresSafeArea())
+            
+            // Floating action button (only show if not done)
+            if report.status != .done {
+                adminActionButton
+                    .padding()
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+            
+            // Success message overlay
+            if showSuccessMessage {
+                successBanner
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
         .navigationTitle("Report Details")
         .navigationBarTitleDisplayMode(.inline)
+        .alert(actionType.title, isPresented: $showConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button(actionType.buttonText) {
+                Task {
+                    await performAction()
+                }
+            }
+        } message: {
+            Text(actionType.message)
+        }
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: showSuccessMessage)
     }
     
     // MARK: - Header
@@ -471,6 +535,129 @@ struct AdminReportDetailView: View {
         if risk >= 4.0 { return .red }
         else if risk >= 3.0 { return .orange }
         else { return .yellow }
+    }
+    
+    // MARK: - Admin Action Button
+    
+    private var adminActionButton: some View {
+        Button {
+            // Determine action based on current status
+            if report.status == .pending {
+                actionType = .startWork
+            } else if report.status == .inProgress {
+                actionType = .markDone
+            }
+            showConfirmation = true
+        } label: {
+            HStack(spacing: 12) {
+                if isUpdating {
+                    ProgressView()
+                        .tint(.white)
+                } else {
+                    Image(systemName: report.status == .pending ? "play.circle.fill" : "checkmark.circle.fill")
+                        .font(.title3)
+                    Text(report.status == .pending ? "Start Working" : "Mark as Done")
+                        .font(.headline)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(report.status == .pending ? Color.blue : Color.green)
+                    .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
+            )
+            .foregroundColor(.white)
+        }
+        .disabled(isUpdating)
+        .opacity(isUpdating ? 0.6 : 1.0)
+    }
+    
+    // MARK: - Success Banner
+    
+    private var successBanner: some View {
+        VStack {
+            HStack(spacing: 12) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.title2)
+                    .foregroundColor(.white)
+                
+                Text(successMessage)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundColor(.white)
+                
+                Spacer()
+            }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.green)
+                    .shadow(radius: 8)
+            )
+            .padding(.horizontal)
+            .padding(.top, 8)
+            
+            Spacer()
+        }
+    }
+    
+    // MARK: - Perform Action
+    
+    private func performAction() async {
+        guard let reportId = report.id else {
+            print("❌ [ACTION] No report ID available")
+            return
+        }
+        
+        isUpdating = true
+        
+        do {
+            let newStatus: ReportStatus
+            let assignedTo: String?
+            
+            if actionType == .startWork {
+                newStatus = .inProgress
+                // Get current admin user ID
+                assignedTo = Auth.auth().currentUser?.uid ?? "admin"
+                successMessage = "Report assigned to you and moved to In Progress"
+            } else {
+                newStatus = .done
+                assignedTo = nil
+                successMessage = "Report marked as completed"
+            }
+            
+            print("🎯 [ACTION] Updating report \(reportId) to \(newStatus.rawValue)")
+            
+            try await reportService.updateReportStatus(
+                reportId: reportId,
+                newStatus: newStatus,
+                assignedTo: assignedTo
+            )
+            
+            print("✅ [ACTION] Status updated successfully")
+            
+            // Show success message
+            withAnimation {
+                showSuccessMessage = true
+            }
+            
+            // Auto-hide success message after 2 seconds
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            
+            withAnimation {
+                showSuccessMessage = false
+            }
+            
+            // Navigate back after brief delay
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            dismiss()
+            
+        } catch {
+            print("❌ [ACTION] Failed to update status: \(error.localizedDescription)")
+            // Could show error alert here
+        }
+        
+        isUpdating = false
     }
 }
 
