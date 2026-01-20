@@ -278,6 +278,8 @@
 		};
 		795520B22F174D22008E5131 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 795520A82F174D21008E5131 /* DrainGuardHCM */;
+			baseConfigurationReferenceRelativePath = View/Report/Config.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -313,6 +315,8 @@
 		};
 		795520B32F174D22008E5131 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 795520A82F174D21008E5131 /* DrainGuardHCM */;
+			baseConfigurationReferenceRelativePath = View/Report/Config.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
