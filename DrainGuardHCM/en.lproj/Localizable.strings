@@ -86,3 +86,146 @@
 "tab.map" = "Map";
 "tab.status" = "Status";
 "tab.profile" = "Profile";
+
+"status.title.allReports" = "All Reports";
+"status.title.myReports" = "My Reports";
+"status.loading" = "Loading reports…";
+"status.error.title" = "Error loading reports";
+"status.empty.pending" = "No pending reports";
+"status.empty.inProgress" = "No in-progress reports";
+"status.empty.done" = " No done reports";
+
+"status.tab.pending" = "Pending";
+"status.tab.inProgress" = "In Progress";
+"status.tab.done" = "Done";
+
+
+"weather.city.hcm" = "Ho Chi Minh City";
+
+"weather.condition.lightRain" = "Light rain";
+
+"weather.summary.rainingNow" = "It’s raining now";
+
+"weather.rainChance %d" = "Rain chance: %d%%";
+
+"weather.action.detail" = "Details";
+
+"reportDetail.title" = "Report Details";
+"reportDetail.loading" = "Loading report...";
+"reportDetail.goBack" = "Go Back";
+"reportDetail.unknown" = "Unknown";
+
+"reportDetail.photoEvidence" = "Photo Evidence";
+"reportDetail.photoFailed" = "Failed to load image";
+
+"reportDetail.basicInfo" = "Basic Information";
+"reportDetail.drainLocation" = "Drain Location";
+"reportDetail.severity" = "Severity";
+"reportDetail.trafficImpact" = "Traffic Impact";
+
+"reportDetail.location" = "Location";
+"reportDetail.showMap" = "Show Map";
+"reportDetail.hideMap" = "Hide Map";
+"reportDetail.marker.drain" = "Drain";
+
+"reportDetail.riskAssessment" = "Risk Assessment";
+"reportDetail.risk.critical" = "Critical - High flood risk";
+"reportDetail.risk.high" = "High - Moderate flood risk";
+"reportDetail.risk.medium" = "Medium - Low flood risk";
+"reportDetail.risk.low" = "Low - Minimal flood risk";
+
+"reportDetail.description" = "Description";
+"reportDetail.noDescription" = "No description provided";
+
+"reportDetail.timeline" = "Timeline";
+"reportDetail.submitted" = "Submitted";
+"reportDetail.lastUpdated" = "Last Updated";
+"reportDetail.completed" = "Completed";
+
+"reportDetail.adminControls" = "Admin Controls";
+"reportDetail.currentStatus %@" = "Current: %@";
+"reportDetail.alreadyCompleted" = "This report is already completed";
+
+"reportDetail.statusDesc.pending" = "Your report is awaiting review";
+"reportDetail.statusDesc.inProgress" = "Maintenance team is working on this";
+"reportDetail.statusDesc.done" = "Issue has been fixed";
+
+"reportDetail.action.startWorking" = "Start Working";
+"reportDetail.action.markDone" = "Mark as Done";
+"reportDetail.action.completed" = "Completed";
+
+"reportDetail.errorTitle" = "Error";
+"reportDetail.ok" = "OK";
+"reportDetail.invalidReportId" = "Invalid report ID";
+
+"status.pending" = "Pending";
+"status.inProgress" = "In Progress";
+"status.done" = "Done";
+
+"common.cancel" = "Cancel";
+"common.na" = "N/A";
+"common.noImage" = "No image";
+"common.imageFailed" = "Failed to load image";
+
+"status.pending" = "Pending";
+"status.inProgress" = "In Progress";
+"status.done" = "Done";
+
+"adminDetail.navTitle" = "Report Details";
+"adminDetail.header.report" = "Report";
+
+"adminDetail.section.photoEvidence" = "Photo Evidence";
+"adminDetail.section.operatorStatus" = "Operator Status Information";
+"adminDetail.section.location" = "Location";
+"adminDetail.section.citizenReport" = "Citizen Report";
+"adminDetail.section.aiValidation" = "AI Validation";
+"adminDetail.section.riskAssessment" = "Risk Assessment";
+"adminDetail.section.locationIntelligence" = "Location Intelligence";
+"adminDetail.section.nearbyPOIs" = "Nearby Points of Interest";
+"adminDetail.section.operatorCompletion" = "Operator Completion Details";
+"adminDetail.section.timeline" = "Timeline";
+
+"adminDetail.field.workflowState" = "Workflow State";
+"adminDetail.field.assignedTo" = "Assigned To";
+"adminDetail.field.operatorNotes" = "Operator Notes:";
+"adminDetail.field.drainId" = "Drain ID";
+"adminDetail.field.coordinates" = "Coordinates";
+"adminDetail.map.drainMarker" = "Drain";
+
+"adminDetail.field.description" = "Description";
+"adminDetail.field.userSeverity" = "User Severity";
+"adminDetail.field.trafficImpact" = "Traffic Impact";
+
+"adminDetail.field.validated" = "Validated";
+"adminDetail.value.valid" = "✅ Valid";
+"adminDetail.value.invalid" = "❌ Invalid";
+"adminDetail.field.aiSeverity" = "AI Severity";
+"adminDetail.field.aiConfidence" = "AI Confidence";
+"adminDetail.field.detectedIssue" = "Detected Issue";
+"adminDetail.field.validationReasons" = "Validation Reasons:";
+"adminDetail.field.rejectionReason" = "Rejection Reason";
+
+"adminDetail.field.nearSchool" = "Near School";
+"adminDetail.field.nearHospital" = "Near Hospital";
+"adminDetail.field.rushHourSubmission" = "Rush Hour Submission";
+
+"adminDetail.field.completedAt" = "Completed At";
+"adminDetail.field.afterPhoto" = "After Photo:";
+
+"adminDetail.field.submitted" = "Submitted";
+"adminDetail.field.aiProcessed" = "AI Processed";
+"adminDetail.field.statusUpdated" = "Status Updated";
+
+"adminDetail.button.startWorking" = "Start Working";
+"adminDetail.button.markDone" = "Mark as Done";
+
+"adminDetail.action.start.title" = "Start Working?";
+"adminDetail.action.start.message" = "This will move the report to In Progress and assign it to you.";
+"adminDetail.action.start.button" = "Start";
+
+"adminDetail.action.done.title" = "Mark as Done?";
+"adminDetail.action.done.message" = "This will mark the report as completed.";
+"adminDetail.action.done.button" = "Complete";
+
+"adminDetail.success.startWork" = "Report assigned to you and moved to In Progress";
+"adminDetail.success.markDone" = "Report marked as completed";

@@ -135,9 +135,9 @@ struct HomeView: View {
                 .font(.system(size: 22, weight: .bold))
             
             // TODO: replace with real list
-            reportRow(title: "Đường Nguyễn Huệ, Quận 1", date: "18/01/2026", status: .inProgress)
-            reportRow(title: "Kênh Nhiêu Lộc, Phường 15", date: "16/01/2026", status: .done)
-            reportRow(title: "Đường Lê Lợi, Quận 1", date: "17/01/2026", status: .sent)
+            reportRow(title: " Nguyen Hue, District 1", date: "18/01/2026", status: .inProgress)
+            reportRow(title: " Nhieu Loc, Ward 15", date: "16/01/2026", status: .done)
+            reportRow(title: " Le Loi, District 1", date: "17/01/2026", status: .sent)
         }
     }
     
@@ -242,7 +242,7 @@ struct HomeView: View {
             }
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(weather.city)
+                Text(weather.cityKey)
                     .font(.system(size: 16, weight: .semibold))
 
                 HStack(spacing: 10) {
@@ -255,7 +255,7 @@ struct HomeView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                Text(weather.summary)
+                Text(weather.summaryKey)
                     .font(.system(size: 13))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
