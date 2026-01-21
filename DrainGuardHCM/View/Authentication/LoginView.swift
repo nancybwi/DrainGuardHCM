@@ -60,7 +60,7 @@ struct LoginView: View {
           )
 
         // App name
-        Text("app.name")
+        Text("DrainGuardHCM")
           .font(.system(size: 24, weight: .bold))
           .foregroundStyle(.primary)
       }
