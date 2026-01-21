@@ -86,3 +86,144 @@
 "tab.map" = "Bản đồ";
 "tab.status" = "Trạng thái";
 "tab.profile" = "Cá nhân";
+
+"status.title.allReports" = "Tất cả báo cáo";
+"status.title.myReports" = "Báo cáo của tôi";
+"status.loading" = "Đang tải báo cáo…";
+"status.error.title" = "Lỗi khi tải báo cáo";
+"status.empty.pending" = "Không có báo cáo đang chờ";
+"status.empty.inProgress" = "Không có báo cáo đang xử lý";
+"status.empty.done" = "Không có báo cáo đã xong";
+
+"status.tab.pending" = "Chờ xử lý";
+"status.tab.inProgress" = "Đang xử lý";
+"status.tab.done" = "Hoàn tất";
+
+"weather.city.hcm" = "TP.HCM";
+
+"weather.condition.lightRain" = "Mưa nhẹ";
+
+"weather.summary.rainingNow" = "Trời đang mưa";
+
+"weather.rainChance %d" = "Khả năng mưa: %d%%";
+
+"weather.action.detail" = "Chi tiết";
+"reportDetail.title" = "Chi tiết báo cáo";
+"reportDetail.loading" = "Đang tải báo cáo...";
+"reportDetail.goBack" = "Quay lại";
+"reportDetail.unknown" = "Không rõ";
+
+"reportDetail.photoEvidence" = "Ảnh minh chứng";
+"reportDetail.photoFailed" = "Không thể tải ảnh";
+
+"reportDetail.basicInfo" = "Thông tin cơ bản";
+"reportDetail.drainLocation" = "Vị trí cống";
+"reportDetail.severity" = "Mức độ";
+"reportDetail.trafficImpact" = "Ảnh hưởng giao thông";
+
+"reportDetail.location" = "Vị trí";
+"reportDetail.showMap" = "Xem bản đồ";
+"reportDetail.hideMap" = "Ẩn bản đồ";
+"reportDetail.marker.drain" = "Cống";
+
+"reportDetail.riskAssessment" = "Đánh giá rủi ro";
+"reportDetail.risk.critical" = "Nguy kịch - Rủi ro ngập cao";
+"reportDetail.risk.high" = "Cao - Rủi ro ngập vừa";
+"reportDetail.risk.medium" = "Trung bình - Rủi ro ngập thấp";
+"reportDetail.risk.low" = "Thấp - Rủi ro tối thiểu";
+
+"reportDetail.description" = "Mô tả";
+"reportDetail.noDescription" = "Không có mô tả";
+
+"reportDetail.timeline" = "Mốc thời gian";
+"reportDetail.submitted" = "Đã gửi";
+"reportDetail.lastUpdated" = "Cập nhật gần nhất";
+"reportDetail.completed" = "Hoàn tất";
+
+"reportDetail.adminControls" = "Điều khiển Admin";
+"reportDetail.currentStatus %@" = "Hiện tại: %@";
+"reportDetail.alreadyCompleted" = "Báo cáo này đã hoàn tất";
+
+"reportDetail.statusDesc.pending" = "Báo cáo của bạn đang chờ xem xét";
+"reportDetail.statusDesc.inProgress" = "Đội vận hành đang xử lý";
+"reportDetail.statusDesc.done" = "Sự cố đã được khắc phục";
+
+"reportDetail.action.startWorking" = "Bắt đầu xử lý";
+"reportDetail.action.markDone" = "Đánh dấu hoàn tất";
+"reportDetail.action.completed" = "Đã hoàn tất";
+
+"reportDetail.errorTitle" = "Lỗi";
+"reportDetail.ok" = "OK";
+"reportDetail.invalidReportId" = "Report ID không hợp lệ";
+
+"status.pending" = "Đang chờ";
+"status.inProgress" = "Đang xử lý";
+"status.done" = "Hoàn tất";
+
+"common.cancel" = "Hủy";
+"common.na" = "N/A";
+"common.noImage" = "Không có ảnh";
+"common.imageFailed" = "Tải ảnh thất bại";
+
+"status.pending" = "Đang chờ";
+"status.inProgress" = "Đang xử lý";
+"status.done" = "Hoàn tất";
+
+"adminDetail.navTitle" = "Chi tiết báo cáo";
+"adminDetail.header.report" = "Báo cáo";
+
+"adminDetail.section.photoEvidence" = "Ảnh minh chứng";
+"adminDetail.section.operatorStatus" = "Thông tin trạng thái xử lý";
+"adminDetail.section.location" = "Vị trí";
+"adminDetail.section.citizenReport" = "Báo cáo của người dân";
+"adminDetail.section.aiValidation" = "Xác thực AI";
+"adminDetail.section.riskAssessment" = "Đánh giá rủi ro";
+"adminDetail.section.locationIntelligence" = "Thông tin vị trí";
+"adminDetail.section.nearbyPOIs" = "Địa điểm lân cận";
+"adminDetail.section.operatorCompletion" = "Chi tiết hoàn tất xử lý";
+"adminDetail.section.timeline" = "Dòng thời gian";
+
+"adminDetail.field.workflowState" = "Trạng thái quy trình";
+"adminDetail.field.assignedTo" = "Phân công cho";
+"adminDetail.field.operatorNotes" = "Ghi chú xử lý:";
+"adminDetail.field.drainId" = "Mã cống";
+"adminDetail.field.coordinates" = "Tọa độ";
+"adminDetail.map.drainMarker" = "Cống";
+
+"adminDetail.field.description" = "Mô tả";
+"adminDetail.field.userSeverity" = "Mức độ (người dùng)";
+"adminDetail.field.trafficImpact" = "Ảnh hưởng giao thông";
+
+"adminDetail.field.validated" = "Kết quả";
+"adminDetail.value.valid" = "✅ Hợp lệ";
+"adminDetail.value.invalid" = "❌ Không hợp lệ";
+"adminDetail.field.aiSeverity" = "Mức độ (AI)";
+"adminDetail.field.aiConfidence" = "Độ tin cậy (AI)";
+"adminDetail.field.detectedIssue" = "Vấn đề phát hiện";
+"adminDetail.field.validationReasons" = "Lý do xác thực:";
+"adminDetail.field.rejectionReason" = "Lý do từ chối";
+
+"adminDetail.field.nearSchool" = "Gần trường học";
+"adminDetail.field.nearHospital" = "Gần bệnh viện";
+"adminDetail.field.rushHourSubmission" = "Gửi vào giờ cao điểm";
+
+"adminDetail.field.completedAt" = "Hoàn tất lúc";
+"adminDetail.field.afterPhoto" = "Ảnh sau xử lý:";
+
+"adminDetail.field.submitted" = "Đã gửi";
+"adminDetail.field.aiProcessed" = "AI xử lý";
+"adminDetail.field.statusUpdated" = "Cập nhật trạng thái";
+
+"adminDetail.button.startWorking" = "Bắt đầu xử lý";
+"adminDetail.button.markDone" = "Đánh dấu hoàn tất";
+
+"adminDetail.action.start.title" = "Bắt đầu xử lý?";
+"adminDetail.action.start.message" = "Thao tác này sẽ chuyển báo cáo sang Đang xử lý và gán cho bạn.";
+"adminDetail.action.start.button" = "Bắt đầu";
+
+"adminDetail.action.done.title" = "Đánh dấu hoàn tất?";
+"adminDetail.action.done.message" = "Thao tác này sẽ đánh dấu báo cáo là đã hoàn tất.";
+"adminDetail.action.done.button" = "Hoàn tất";
+
+"adminDetail.success.startWork" = "Đã gán báo cáo cho bạn và chuyển sang Đang xử lý";
+"adminDetail.success.markDone" = "Đã đánh dấu báo cáo hoàn tất";
